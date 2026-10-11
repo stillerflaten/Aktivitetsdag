@@ -63,10 +63,8 @@ a { color: var(--accent); }
 }
 .topbar::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 4px; background: var(--stripe); }
 .brand { font-weight: 800; font-size: 1.1rem; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
-.logo {
-  display: inline-grid; place-items: center; width: 34px; height: 34px;
-  border-radius: 50%; background: var(--accent-soft); font-size: 1.15rem;
-}
+.logo { width: 34px; height: 34px; border-radius: 22%; display: block; }
+.sport-badge { font-size: 1.1rem; font-weight: normal; }
 .tabs { display: flex; gap: 4px; overflow-x: auto; flex: 1; scrollbar-width: none; }
 .tab {
   border: 0; background: none; color: var(--muted);

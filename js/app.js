@@ -147,7 +147,7 @@
 
   function renderSport() {
     const found = Store.SPORTS.find(([name]) => name === S.event.sport);
-    $('#sport-icon').textContent = found ? found[1] : '⭐';
+    $('#sport-icon').textContent = found ? found[1] : '';
   }
 
   function renderBinds() {
