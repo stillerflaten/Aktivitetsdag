@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <meta name="theme-color" content="#2F4858">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
-  <link rel="stylesheet" href="css/style.css?v=2026-10-11h">
+  <link rel="stylesheet" href="css/style.css?v=2026-10-11i">
 </head>
 <body>
   <header class="topbar">
@@ -26,7 +26,10 @@
       <button class="tab" data-tab="dommer" role="tab">Dommere</button>
       <button class="tab" data-tab="regler" role="tab">Regler og råd</button>
     </nav>
-    <button class="btn primary" id="btn-export">📄 PDF</button>
+    <div class="top-actions">
+      <button class="btn" id="btn-export" title="Skriv ut eller velg hvilke sider som skal med">🖨️ <span>Skriv ut</span></button>
+      <button class="btn primary" id="btn-pdf-download" title="Last ned alt om dagen som én PDF">⬇️ <span>Lagre som PDF</span></button>
+    </div>
   </header>
 
   <main id="app">
@@ -71,6 +74,7 @@
         <p class="muted">Alt lagres automatisk i denne nettleseren. Vil du bruke det på en annen maskin, eller dele med en annen trener, lagrer du en fil og åpner den der.</p>
         <div class="row">
           <button class="btn" id="btn-save-file">⬇️ Lagre til fil</button>
+          <button class="btn" data-pdf-download>📄 Lagre som PDF</button>
           <label class="btn">⬆️ Åpne fil<input type="file" id="file-open" accept=".json,application/json" hidden></label>
           <button class="btn danger" id="btn-reset">🗑️ Slett alt</button>
         </div>
@@ -320,25 +324,25 @@
   <!-- Eksport-dialog -->
   <dialog id="export-dialog">
     <form method="dialog">
-      <h2>Lag PDF</h2>
-      <p class="muted">Velg hva som skal være med. Trykk så «Lag PDF», og velg <b>Lagre som PDF</b> i utskriftsvinduet.</p>
+      <h2>Skriv ut</h2>
+      <p class="muted">Velg hva som skal være med, og trykk «Skriv ut». I utskriftsvinduet kan du også velge <b>Lagre som PDF</b>. Vil du bare laste ned alt som én PDF, bruker du knappen «Lagre som PDF» i stedet.</p>
       <label class="check"><input type="checkbox" name="lag" checked> Laginndeling</label>
       <label class="check"><input type="checkbox" name="kamp" checked> Kampoppsett</label>
       <label class="check"><input type="checkbox" name="oppgaver" checked> Oppgavefordeling</label>
       <label class="check"><input type="checkbox" name="dommer" checked> Dommeroppsett</label>
       <div class="row end">
         <button class="btn" value="cancel">Avbryt</button>
-        <button class="btn primary" value="ok">Lag PDF</button>
+        <button class="btn primary" value="ok">Skriv ut</button>
       </div>
     </form>
   </dialog>
 
-  <div id="print-area"></div>
+  <div id="print-area" class="p-doc"></div>
   <div id="toast" role="status"></div>
 
-  <script src="js/state.js?v=2026-10-11h"></script>
-  <script src="js/algorithms.js?v=2026-10-11h"></script>
-  <script src="js/print.js?v=2026-10-11h"></script>
-  <script src="js/app.js?v=2026-10-11h"></script>
+  <script src="js/state.js?v=2026-10-11i"></script>
+  <script src="js/algorithms.js?v=2026-10-11i"></script>
+  <script src="js/print.js?v=2026-10-11i"></script>
+  <script src="js/app.js?v=2026-10-11i"></script>
 </body>
 </html>
