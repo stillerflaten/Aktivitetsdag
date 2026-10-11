@@ -158,7 +158,9 @@
         const used = new Set();
         result[slotId] = {};
         for (let bi = 0; bi < nB; bi++) {
-          const avail = ids.filter((id) => !used.has(id) && games[id] < cap);
+          // «Tre på rad» er en fast regel: et lag som har spilt de to siste rundene, må hvile.
+          const tired = (id) => opts.avoidThreeInRow && last[id] === si - 1 && streak[id] >= 2;
+          const avail = ids.filter((id) => !used.has(id) && games[id] < cap && !tired(id));
           if (avail.length < 2) break;
           const rest = (id) => {
             if (last[id] !== si - 1) return 0;
