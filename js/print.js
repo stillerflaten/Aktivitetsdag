@@ -100,9 +100,20 @@
 
   const builders = { lag, kamp, oppgaver, dommer };
 
+  // Topp- og bunntekst på hver side, f.eks. «Aktivitetsdag - Astor».
+  function runningText() {
+    const e = S.event;
+    return [e.title || 'Aktivitetsdag', e.club].filter((x) => x && x.trim()).join(' - ');
+  }
+
   function print(sections) {
     const area = document.getElementById('print-area');
-    area.innerHTML = sections.map((s) => builders[s]()).join('');
+    const text = esc(runningText());
+    // Topptekst i <thead> gjentas øverst på hver utskrevne side. Bunnteksten står fast nederst,
+    // og en tom <tfoot> holder av plass til den så innholdet ikke havner oppå.
+    area.innerHTML = `<div class="p-runfoot">${text}</div>` + sections.map((s) => builders[s]()
+      .replace('<section class="p-page">', `<section class="p-page"><table class="p-wrap"><thead><tr><td><div class="p-runhead">${text}</div></td></tr></thead><tbody><tr><td>`)
+      .replace(/<\/section>$/, '</td></tr></tbody><tfoot><tr><td><div class="p-footspace"></div></td></tr></tfoot></table></section>')).join('');
     // Gi nettleseren et øyeblikk til å tegne før utskriftsvinduet åpnes.
     setTimeout(() => window.print(), 50);
   }
