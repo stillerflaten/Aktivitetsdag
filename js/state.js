@@ -55,7 +55,8 @@
         matches: {}, // slotId -> baneId -> [lagA, lagB]
         avoidSameClub: true,
         avoidBackToBack: true,
-        avoidThreeInRow: true
+        avoidThreeInRow: true,
+        equalGames: false
       },
       tasks: defaultTasks(),
       refs: {

@@ -132,6 +132,14 @@
     const nB = Math.min(baneIds.length, Math.floor(ids.length / 2));
     if (nB === 0) return {};
 
+    // Med «like mange kamper» får ingen lag flere kamper enn alle kan få.
+    // Noen baner kan da stå tomme i enkelte runder.
+    let cap = Infinity;
+    if (opts.equalGames) {
+      cap = Math.floor((slotIds.length * nB * 2) / ids.length);
+      if ((cap * ids.length) % 2) cap--;
+    }
+
     let best = null;
     let bestScore = Infinity;
     for (let attempt = 0; attempt < 400; attempt++) {
@@ -149,7 +157,8 @@
         const used = new Set();
         result[slotId] = {};
         for (let bi = 0; bi < nB; bi++) {
-          const avail = ids.filter((id) => !used.has(id));
+          const avail = ids.filter((id) => !used.has(id) && games[id] < cap);
+          if (avail.length < 2) break;
           const rest = (id) => {
             if (last[id] !== si - 1) return 0;
             return (opts.avoidBackToBack ? 5 : 0) + (opts.avoidThreeInRow && streak[id] >= 2 ? 25 : 0);
