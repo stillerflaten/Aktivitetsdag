@@ -334,6 +334,10 @@ dialog::backdrop { background: rgba(23, 34, 41, .45); }
 .app-card { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; color: inherit; text-decoration: none; font-size: .9rem; }
 .app-card:hover { border-color: var(--accent); }
 
+/* Velkomstanimasjon med baller (js/intro.js) */
+.ball-drop { position: fixed; inset: 0; z-index: 1000; pointer-events: none; overflow: hidden; }
+.ball-drop img { position: absolute; display: block; will-change: transform, opacity; }
+
 /* ---------- Utskrift / PDF ---------- */
 #print-area { display: none; }
 
@@ -386,7 +390,7 @@ dialog::backdrop { background: rgba(23, 34, 41, .45); }
 @media print {
   body { background: #fff; color: #000; font-size: 10pt; }
   .topbar::after { display: none; }
-  .topbar, main, .site-foot, dialog, #toast { display: none !important; }
+  .topbar, main, .site-foot, dialog, #toast, .ball-drop { display: none !important; }
   #print-area { display: block; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
