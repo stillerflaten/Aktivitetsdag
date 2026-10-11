@@ -145,7 +145,13 @@
 
   // ---------- Tegning av sidene ----------
 
+  function renderSport() {
+    const found = Store.SPORTS.find(([name]) => name === S.event.sport);
+    $('#sport-icon').textContent = found ? found[1] : '⭐';
+  }
+
   function renderBinds() {
+    renderSport();
     for (const el of $$('[data-bind]')) {
       if (el === document.activeElement) continue;
       const v = getPath(S, el.dataset.bind);
@@ -614,9 +620,17 @@
   // ---------- Oppstart ----------
 
   function init() {
+    $('#sport-select').insertAdjacentHTML('beforeend',
+      Store.SPORTS.map(([name, icon]) => `<option value="${esc(name)}">${icon} ${esc(name)}</option>`).join(''));
+
     document.addEventListener('click', (e) => {
-      const tab = e.target.closest('.tab');
-      if (tab) { showTab(tab.dataset.tab); return; }
+      const tab = e.target.closest('.tab, [data-goto]');
+      if (tab) {
+        e.preventDefault();
+        showTab(tab.dataset.tab || tab.dataset.goto);
+        window.scrollTo(0, 0);
+        return;
+      }
 
       const pr = e.target.closest('[data-print]');
       if (pr) { Print.print([pr.dataset.print]); return; }

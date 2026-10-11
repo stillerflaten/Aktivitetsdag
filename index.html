@@ -3,20 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Aktivitetsdag – barneishockey</title>
-  <meta name="description" content="Laginndeling, kampoppsett, oppgavefordeling og dommeroppsett for aktivitetsdager i barneishockey.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%92%3C/text%3E%3C/svg%3E">
+  <title>Aktivitetsdag – barneidrett</title>
+  <meta name="description" content="Laginndeling, kampoppsett, oppgavefordeling og dommeroppsett for aktivitetsdager i barneidrett.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">🏒 <span>Aktivitetsdag</span></div>
+    <div class="brand"><span class="logo" id="sport-icon">⭐</span> <span>Aktivitetsdag</span></div>
     <nav class="tabs" role="tablist">
       <button class="tab" data-tab="dag" role="tab">Dagen</button>
       <button class="tab" data-tab="lag" role="tab">Laginndeling</button>
       <button class="tab" data-tab="kamp" role="tab">Kampoppsett</button>
       <button class="tab" data-tab="oppgaver" role="tab">Oppgaver</button>
       <button class="tab" data-tab="dommer" role="tab">Dommere</button>
+      <button class="tab" data-tab="regler" role="tab">Regler og råd</button>
     </nav>
     <button class="btn primary" id="btn-export">📄 PDF</button>
   </header>
@@ -24,12 +28,25 @@
   <main id="app">
     <!-- DAGEN -->
     <section class="page" id="page-dag">
-      <h1>Om aktivitetsdagen</h1>
+      <div class="hero">
+        <div class="hero-text">
+          <h1>Planlegg aktivitetsdagen på et blunk</h1>
+          <p>Lag, kamper, foreldreoppgaver og dommere for barneidrett, klart til utskrift. Laget med <a href="#" data-goto="regler">idrettens barnerettigheter</a> i bakhodet: jevne lag, like mye spilletid og nye lagkamerater hver gang.</p>
+        </div>
+        <div class="hero-icons" aria-hidden="true">⚽🏒🤾🏀🏐🥅</div>
+      </div>
+
+      <h2 class="section-title">Om aktivitetsdagen</h2>
       <div class="card">
         <div class="grid2">
           <label>Tittel<input data-bind="event.title" placeholder="Aktivitetsdag"></label>
           <label>Dato<input type="date" data-bind="event.date"></label>
-          <label>Sted / ishall<input data-bind="event.place" placeholder="Dalgård ishall"></label>
+          <label>Idrett
+            <select data-bind="event.sport" id="sport-select">
+              <option value="">Velg idrett</option>
+            </select>
+          </label>
+          <label>Sted / hall / bane<input data-bind="event.place" placeholder="Dalgård ishall"></label>
           <label>Egen klubb<input data-bind="event.club" placeholder="Astor"></label>
           <label>Årsklasse for egne lag<input data-bind="event.ageGroup" placeholder="U9"></label>
         </div>
@@ -147,7 +164,7 @@
             <label>Kamplengde (min)<input type="number" min="1" data-bind="schedule.timing.matchMin" data-type="number"></label>
             <label>Pause mellom (min)<input type="number" min="0" data-bind="schedule.timing.breakMin" data-type="number"></label>
             <label>Antall kamprunder<input type="number" min="1" max="40" data-bind="schedule.timing.rounds" data-type="number"></label>
-            <label>Avslutning (tekst)<input data-bind="schedule.timing.endLabel" placeholder="Premieutdeling, nedrigg"></label>
+            <label>Avslutning (tekst)<input data-bind="schedule.timing.endLabel" placeholder="Premieutdeling og rydding"></label>
             <label>Avslutning (min)<input type="number" min="0" data-bind="schedule.timing.endMin" data-type="number"></label>
           </div>
           <div class="row"><button class="btn" id="btn-gen-times">⏱️ Lag tidspunkter</button></div>
@@ -221,6 +238,63 @@
       <div class="card">
         <h2>Oppsett</h2>
         <div class="table-wrap"><table class="grid" id="ref-schedule"></table></div>
+      </div>
+    </section>
+    <!-- REGLER OG RÅD -->
+    <section class="page" id="page-regler">
+      <div class="page-head">
+        <h1>Regler og råd for barneidrett</h1>
+      </div>
+      <p class="lead">All organisert idrett for barn i Norge, til og med det året barna fyller 12 år, følger Norges idrettsforbunds <b>barnerettigheter</b> og <b>bestemmelser om barneidrett</b>. Her er en kortversjon. Les gjerne originalen, og sjekk om ditt særforbund har egne regler for kampformer og banestørrelser.</p>
+
+      <div class="card">
+        <h2>Idrettens barnerettigheter</h2>
+        <div class="rights">
+          <div class="right"><span>🛡️</span><div><b>Trygghet</b><p>Barn skal ha et trygt miljø, uten press og utnyttelse. Barn under 6 år skal ha med seg en voksen.</p></div></div>
+          <div class="right"><span>🤝</span><div><b>Vennskap og trivsel</b><p>Aktiviteten skal gi vennskap og samhold.</p></div></div>
+          <div class="right"><span>🌟</span><div><b>Mestring</b><p>Barn skal oppleve mestring og lære mange ferdigheter, gjennom variasjon, øving og lek med andre.</p></div></div>
+          <div class="right"><span>💬</span><div><b>Medbestemmelse</b><p>Barn skal få si sin mening og bli hørt når aktiviteten planlegges og gjennomføres.</p></div></div>
+          <div class="right"><span>🧭</span><div><b>Frihet til å velge</b><p>Barn velger selv hvilke og hvor mange idretter de vil drive med, og hvor mye de vil trene.</p></div></div>
+          <div class="right"><span>🏅</span><div><b>Konkurranser for alle</b><p>Barn velger selv om de vil delta i konkurranser.</p></div></div>
+          <div class="right"><span>🧒</span><div><b>På barnas premisser</b><p>Aktiviteten skal tilpasses barnas alder, utvikling og modenhet.</p></div></div>
+          <div class="right"><span>💛</span><div><b>Alle kan være med</b><p>Det skal ikke være avgjørende for barnas deltakelse hva foreldrene har råd til eller hvor mye de engasjerer seg.</p></div></div>
+        </div>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Bestemmelser om konkurranser</h2>
+          <ul class="ages">
+            <li><span class="age">6 år</span><div>Barn kan delta i <b>lokale</b> konkurranser og arrangementer fra det året de fyller 6 år, først og fremst i egen klubb.</div></li>
+            <li><span class="age">9 år</span><div>Fra det året de fyller 9 år kan barn delta i <b>regionale</b> konkurranser og arrangementer.</div></li>
+            <li><span class="age">11 år</span><div>Fra det året de fyller 11 år kan barn delta i <b>åpne</b> konkurranser i Norge, Norden og Barentsregionen. Først da kan det brukes <b>resultatlister, tabeller og rangeringer</b>, dersom det er formålstjenlig.</div></li>
+            <li><span class="age">12 år</span><div>Barn kan ikke delta i mesterskap som NM, EM og VM til og med det året de fyller 12 år.</div></li>
+            <li><span class="age">🏆</span><div><b>Alle barn skal få premie</b> hvis det deles ut premier.</div></li>
+          </ul>
+          <p class="muted">Kilde: <a href="https://idrettsforbundet.no/contentassets/b034b278300846a49afa033e42d8e829/82_19_barneidrettsbestemmelsene_no_lr-3.pdf" target="_blank" rel="noopener">Idrettens barnerettigheter og bestemmelser om barneidrett (NIF, revidert 2019)</a>. Kortversjonen her erstatter ikke originalen.</p>
+        </div>
+
+        <div class="card">
+          <h2>Slik hjelper siden deg</h2>
+          <ul class="checks">
+            <li><b>Ingen resultater:</b> kampoppsettet har ingen felt for resultater eller tabeller.</li>
+            <li><b>Like mange kamper:</b> alle lag får like mange kamper, eller så nær det går.</li>
+            <li><b>Jevne lag:</b> lagene blir like store, og ingen velges først eller sist.</li>
+            <li><b>Nye lagkamerater:</b> rulleringen blander lagene fra gang til gang, så barna blir kjent med flere.</li>
+            <li><b>Pauser:</b> lagene slipper helst å spille to kamper på rad.</li>
+            <li><b>Delt dugnad:</b> oppgavene fordeles likt mellom familiene, uansett hvor mye den enkelte pleier å stille opp.</li>
+          </ul>
+
+          <h2>Gode råd for dagen</h2>
+          <ul class="tips">
+            <li>Del ut premie til alle, og gjerne lik premie.</li>
+            <li>Bruk små baner og få spillere per lag, så alle får være mye med i spillet.</li>
+            <li>Bytt spillere ofte, og la alle prøve ulike posisjoner, også keeper.</li>
+            <li>Dommerne er der for å hjelpe barna. Forklar heller enn å straffe.</li>
+            <li>Gi foreldrene en tydelig oppgave og be dem heie på alle lag.</li>
+            <li>Spør barna etterpå hva de syntes var gøy, og ta det med til neste gang.</li>
+          </ul>
+        </div>
       </div>
     </section>
   </main>
