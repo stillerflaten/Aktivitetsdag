@@ -725,7 +725,21 @@
     if (!$('#page-' + name)) name = 'dag';
     $$('.tab').forEach((t) => t.classList.toggle('active', t.dataset.tab === name));
     $$('.page').forEach((p) => p.classList.toggle('active', p.id === 'page-' + name));
+    $('#btn-settings').classList.toggle('active', name === 'innstillinger');
     try { localStorage.setItem('aktivitetsdag.tab', name); } catch (e) { /* ignorer */ }
+  }
+
+  // ---------- Utseende ----------
+  // Lagres for seg (ikke i S), så valget ikke følger med når en fil deles med en annen trener.
+
+  function currentTheme() {
+    try { return localStorage.getItem('aktivitetsdag.theme') || 'auto'; } catch (e) { return 'auto'; }
+  }
+
+  function setTheme(theme) {
+    if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    else delete document.documentElement.dataset.theme;
+    try { localStorage.setItem('aktivitetsdag.theme', theme); } catch (e) { /* ignorer */ }
   }
 
   // ---------- Oppstart ----------
@@ -813,6 +827,11 @@
       if (dlg.returnValue !== 'ok') return;
       const chosen = ['lag', 'kamp', 'oppgaver', 'dommer'].filter((n) => dlg.querySelector(`[name=${n}]`).checked);
       if (chosen.length) Print.print(chosen);
+    });
+
+    $$('input[name=theme]').forEach((r) => {
+      r.checked = r.value === currentTheme();
+      r.addEventListener('change', () => setTheme(r.value));
     });
 
     let tab = 'dag';
