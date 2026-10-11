@@ -135,8 +135,9 @@
     // Med «like mange kamper» får ingen lag flere kamper enn alle kan få.
     // Noen baner kan da stå tomme i enkelte runder.
     let cap = Infinity;
+    if (opts.targetGames) cap = opts.targetGames;
     if (opts.equalGames) {
-      cap = Math.floor((slotIds.length * nB * 2) / ids.length);
+      cap = Math.min(cap, Math.floor((slotIds.length * nB * 2) / ids.length));
       if ((cap * ids.length) % 2) cap--;
     }
 
@@ -157,7 +158,9 @@
         const used = new Set();
         result[slotId] = {};
         for (let bi = 0; bi < nB; bi++) {
-          const avail = ids.filter((id) => !used.has(id) && games[id] < cap);
+          // «Tre på rad» er en fast regel: et lag som har spilt de to siste rundene, må hvile.
+          const tired = (id) => opts.avoidThreeInRow && last[id] === si - 1 && streak[id] >= 2;
+          const avail = ids.filter((id) => !used.has(id) && games[id] < cap && !tired(id));
           if (avail.length < 2) break;
           const rest = (id) => {
             if (last[id] !== si - 1) return 0;
@@ -215,7 +218,17 @@
 
   // ---------- Dommeroppsett ----------
 
-  function makeRefs(people, baneIds, slotIds, matches, perMatch, block) {
+  // Med sameBane får hver bane sine faste dommere hele dagen (fordelt etter tur i listen).
+  // Har en bane flere dommere enn det trengs per kamp, bytter de på innenfor banen.
+  function refGroups(people, baneIds, slotIds, matches) {
+    const used = baneIds.filter((b) => slotIds.some((s) => (matches[s] || {})[b]));
+    const groups = Object.fromEntries(used.map((b) => [b, []]));
+    people.forEach((p, i) => { if (used.length) groups[used[i % used.length]].push(p.id); });
+    return groups;
+  }
+
+  function makeRefs(people, baneIds, slotIds, matches, perMatch, block, sameBane) {
+    const groups = sameBane ? refGroups(people, baneIds, slotIds, matches) : null;
     const counts = Object.fromEntries(people.map((p) => [p.id, 0]));
     const current = {};
     const out = {};
@@ -232,7 +245,8 @@
         } else {
           refs = [];
           for (let i = 0; i < perMatch; i++) {
-            const free = people.map((p) => p.id).filter((id) => !usedNow.has(id) && !refs.includes(id));
+            const free = people.map((p) => p.id).filter((id) => !usedNow.has(id) && !refs.includes(id) &&
+              (!groups || groups[baneId].includes(id)));
             const pick = argmin(free, (id) => counts[id] * 10 + (cur && cur.refs.includes(id) ? 3 : 0) + Math.random());
             if (pick) refs.push(pick);
           }
@@ -282,5 +296,5 @@
     });
   }
 
-  window.Algo = { shuffle, makeTeams, countRepeats, puljer, makeSchedule, makeRefs, makeTasks, parseRange };
+  window.Algo = { shuffle, makeTeams, countRepeats, puljer, makeSchedule, makeRefs, refGroups, makeTasks, parseRange };
 })();
