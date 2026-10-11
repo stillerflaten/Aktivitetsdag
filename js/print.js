@@ -1,0 +1,111 @@
+// Bygger rene utskriftsversjoner av hver side (brukes til PDF).
+(function () {
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function shortDate(iso) {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    return `${+d}.${+m}.${y.slice(2)}`;
+  }
+
+  // Lys tekst på mørk bakgrunn og omvendt.
+  function textOn(hex) {
+    const h = (hex || '#ffffff').replace('#', '');
+    const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.substr(i, 2), 16));
+    return (r * 299 + g * 587 + b * 114) / 1000 > 140 ? '#111' : '#fff';
+  }
+
+  function heading(title, sub) {
+    const e = S.event;
+    const place = [e.title || 'Aktivitetsdag', e.place, shortDate(e.date)].filter(Boolean).join(' ');
+    return `<div class="p-head"><div class="p-title">${esc(place)}</div><div class="p-sub">${esc(sub || title)}</div></div>`;
+  }
+
+  function lag() {
+    const teams = App.currentTeams();
+    const club = S.event.club ? S.event.club + ' ' : '';
+    const age = S.event.ageGroup ? ' ' + S.event.ageGroup : '';
+    const cols = teams.map((t) => `
+      <div class="p-team" style="--c:${esc(t.color)}">
+        <div class="p-team-name" style="background:${esc(t.color)};color:${textOn(t.color)}">${esc(club + t.name + age)}</div>
+        <div class="p-team-coach">${esc(t.coaches) || '&nbsp;'}</div>
+        <ol>${t.players.map((p) => `<li>${esc(p.name)}</li>`).join('')}</ol>
+      </div>`).join('');
+    return `<section class="p-page">${heading('', 'LAGINNDELING')}<div class="p-teams">${cols || '<p>Ingen laginndeling ennå.</p>'}</div></section>`;
+  }
+
+  function kamp() {
+    const sch = S.schedule;
+    const banes = sch.banes;
+    const teamMap = App.teamMap();
+    const classes = [...new Set(Object.values(teamMap).map((t) => t.klasse).filter(Boolean))];
+    let html = `<table class="p-table"><thead><tr><th rowspan="2">Tidspunkt</th>`;
+    html += banes.map((b) => `<th colspan="2">${esc(b.name)}${b.klasse ? ' – ' + esc(b.klasse) : ''}</th>`).join('');
+    html += `</tr><tr>${banes.map(() => '<th>Lag</th><th>Lag</th>').join('')}</tr></thead><tbody>`;
+    for (const slot of sch.slots) {
+      const time = `${esc(slot.from)}${slot.to ? '-' + esc(slot.to) : ''}`;
+      if (slot.type === 'break') {
+        html += `<tr class="p-break"><td>${time}</td><td colspan="${banes.length * 2}">${esc(slot.label)}</td></tr>`;
+        continue;
+      }
+      html += `<tr><td>${time}</td>`;
+      for (const b of banes) {
+        const m = (sch.matches[slot.id] || {})[b.id];
+        html += m ? `<td>${esc((teamMap[m[0]] || {}).label)}</td><td>${esc((teamMap[m[1]] || {}).label)}</td>` : '<td></td><td></td>';
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+
+    const counts = App.matchCounts();
+    const list = Object.values(teamMap).map((t) => `<tr><td>${esc(t.label)}</td><td>${counts[t.id] || 0}</td></tr>`).join('');
+    html += `<table class="p-table p-small"><thead><tr><th>Lag</th><th>Kamper</th></tr></thead><tbody>${list}</tbody></table>`;
+    return `<section class="p-page">${heading('', 'KAMPOPPSETT' + (classes.length ? ' ' + classes.join(', ') : ''))}${html}</section>`;
+  }
+
+  function oppgaver() {
+    const fam = App.familyMap();
+    const rows = S.tasks.map((t) => `<tr><td>${esc(t.name)}</td><td>${esc(t.time)}</td><td>${t.assigned.map((id) => esc(fam[id] || '')).filter(Boolean).join('<br>')}</td></tr>`).join('');
+    return `<section class="p-page">${heading('', 'OPPGAVEFORDELING')}
+      <table class="p-table p-tasks"><thead><tr><th>Oppgave</th><th>Tidspunkt</th><th>Ansvarlige</th></tr></thead><tbody>${rows}</tbody></table></section>`;
+  }
+
+  function dommer() {
+    const sch = S.schedule;
+    const banes = sch.banes;
+    const names = Object.fromEntries(S.refs.people.map((p) => [p.id, p.name]));
+    const teamMap = App.teamMap();
+    let html = `<table class="p-table"><thead><tr><th>Tidspunkt</th>${banes.map((b) => `<th>${esc(b.name)}</th>`).join('')}</tr></thead><tbody>`;
+    for (const slot of sch.slots) {
+      const time = `${esc(slot.from)}${slot.to ? '-' + esc(slot.to) : ''}`;
+      if (slot.type === 'break') {
+        html += `<tr class="p-break"><td>${time}</td><td colspan="${banes.length}">${esc(slot.label)}</td></tr>`;
+        continue;
+      }
+      html += `<tr><td>${time}</td>`;
+      for (const b of banes) {
+        const m = (sch.matches[slot.id] || {})[b.id];
+        const refs = ((S.refs.assignment[slot.id] || {})[b.id] || []).map((id) => names[id]).filter(Boolean);
+        html += m
+          ? `<td><b>${refs.map(esc).join(' / ') || '–'}</b><div class="p-match">${esc((teamMap[m[0]] || {}).label)} – ${esc((teamMap[m[1]] || {}).label)}</div></td>`
+          : '<td></td>';
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    const counts = App.refCounts();
+    html += `<table class="p-table p-small"><thead><tr><th>Dommer</th><th>Kamper</th></tr></thead><tbody>${S.refs.people.map((p) => `<tr><td>${esc(p.name)}</td><td>${counts[p.id] || 0}</td></tr>`).join('')}</tbody></table>`;
+    return `<section class="p-page">${heading('', 'DOMMEROPPSETT')}${html}</section>`;
+  }
+
+  const builders = { lag, kamp, oppgaver, dommer };
+
+  function print(sections) {
+    const area = document.getElementById('print-area');
+    area.innerHTML = sections.map((s) => builders[s]()).join('');
+    // Gi nettleseren et øyeblikk til å tegne før utskriftsvinduet åpnes.
+    setTimeout(() => window.print(), 50);
+  }
+
+  window.Print = { print, esc, shortDate, textOn };
+})();
