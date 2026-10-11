@@ -1,4 +1,6 @@
-# Aktivitetsdag ⭐
+# Aktivitetsdag
+
+<img src="assets/logo.svg" alt="Logo" width="96">
 
 En enkel nettside som hjelper trenere å planlegge aktivitetsdager i barneidrett, enten det er ishockey, fotball, håndball eller noe annet:
 
@@ -41,3 +43,4 @@ Dobbeltklikk på `index.html`, så åpnes siden i nettleseren. Det trengs ingen 
 - `js/algorithms.js` – fordeling av lag, kamper, dommere og oppgaver
 - `js/print.js` – utskriftsversjonene (PDF)
 - `js/app.js` – knapper, skjemaer og tabeller
+- `assets/` – logo (`logo.svg`), appikon i 1024 × 1024 for App Store (`app-icon-1024.png`, uten gjennomsiktighet og avrundede hjørner) og ikoner for nettleser og hjemskjerm
