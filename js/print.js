@@ -30,11 +30,9 @@
 
   function lag() {
     const teams = App.currentTeams();
-    const club = S.event.club ? S.event.club + ' ' : '';
-    const age = S.event.ageGroup ? ' ' + S.event.ageGroup : '';
     const cols = teams.map((t) => `
       <div class="p-team" style="--c:${esc(t.color)}">
-        <div class="p-team-name" style="background:${esc(t.color)};color:${textOn(t.color)}">${esc(club + t.name + age)}</div>
+        <div class="p-team-name" style="background:${esc(t.color)};color:${textOn(t.color)}">${esc(App.teamLabel(t.name, S.event.club, S.event.ageGroup))}</div>
         ${t.coaches ? `<div class="p-team-coach">${esc(t.coaches)}</div>` : ''}
         <ol>${t.players.map((p) => `<li>${esc(p.name)}</li>`).join('')}</ol>
       </div>`).join('');
@@ -149,40 +147,83 @@
     return [slug(e.title) || 'aktivitetsdag', slug(e.club), e.date].filter(Boolean).join('-') + '.pdf';
   }
 
+  // Hver del (laginndeling, kampoppsett …) tegnes for seg og legges på egne sider.
+  // Det gir like sideskift i alle nettlesere (også Safari).
   async function download(sections) {
     await loadLib();
-    const el = document.createElement('div');
-    el.className = 'p-doc p-download';
-    // A4 liggende minus marger (277 mm) i skjermpiksler, så skriftstørrelsene blir som ved utskrift.
-    el.style.width = '1047px';
-    el.innerHTML = sections.map((s) => builders[s]()).join('<div class="html2pdf__page-break"></div>');
-    const text = runningText();
-    await window.html2pdf().set({
-      margin: [14, 10, 14, 10],
-      filename: fileName(),
-      image: { type: 'jpeg', quality: 0.95 },
-      html2canvas: { scale: 2, backgroundColor: '#ffffff' },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-      pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.p-team'] }
-    }).from(el).toPdf().get('pdf').then((pdf) => {
-      // Topp- og bunntekst på hver side.
-      const n = pdf.internal.getNumberOfPages();
-      const w = pdf.internal.pageSize.getWidth();
-      const h = pdf.internal.pageSize.getHeight();
-      for (let i = 1; i <= n; i++) {
-        pdf.setPage(i);
-        pdf.setDrawColor(47, 72, 88);
-        pdf.setLineWidth(0.3);
-        pdf.line(10, 10, w - 10, 10);
-        pdf.line(10, h - 10, w - 10, h - 10);
-        pdf.setFontSize(8);
-        pdf.setTextColor(47, 72, 88);
-        pdf.text(text, 10, 7.5);
-        pdf.text(text, 10, h - 5.5);
-        pdf.setTextColor(184, 104, 74);
-        pdf.text(`Side ${i} av ${n}`, w - 10, h - 5.5, { align: 'right' });
+    const fmt = { unit: 'mm', format: 'a4', orientation: 'landscape' };
+    const opt = { margin: [14, 10, 14, 10], jsPDF: fmt, html2canvas: { scale: 2, backgroundColor: '#ffffff' } };
+    const canvases = [];
+    for (const s of sections) {
+      const el = document.createElement('div');
+      el.className = 'p-doc p-download';
+      el.innerHTML = builders[s]();
+      // Mål hvor hver tabellrad slutter, så lange deler kan deles mellom rader og ikke midt i dem.
+      el.style.cssText = 'position:absolute;left:-20000px;top:0;width:1047px';
+      document.body.appendChild(el);
+      const y0 = el.getBoundingClientRect().top;
+      const cuts = [...el.querySelectorAll('tr, .p-head, .p-team')].map((r) => r.getBoundingClientRect().bottom - y0);
+      el.remove();
+      el.style.cssText = '';
+      // Bredden settes av html2pdf ut fra sidestørrelse og marger (277 mm), så skriften blir som ved utskrift.
+      const cv = await window.html2pdf().set(opt).from(el).toCanvas().get('canvas');
+      cv.cuts = cuts;
+      canvases.push(cv);
+    }
+    // jsPDF ligger inne i html2pdf-pakken; vi starter fra et tomt dokument og fyller første side selv.
+    const pdf = await window.html2pdf().set(opt).from('<div></div>', 'string').toPdf().get('pdf');
+    const W = 297, H = 210, mx = 10, top = 14, areaW = W - 2 * mx, areaH = H - 2 * top;
+    let first = true;
+    const addImg = (cv, w, h, x) => {
+      if (!first) pdf.addPage();
+      first = false;
+      pdf.addImage(cv.toDataURL('image/jpeg', 0.95), 'JPEG', x, top, w, h);
+    };
+    for (const cv of canvases) {
+      const h = cv.height * areaW / cv.width;
+      if (h <= areaH * 1.35) {
+        // Får plass på én side (krymper litt om nødvendig).
+        const k = Math.min(1, areaH / h);
+        addImg(cv, areaW * k, h * k, mx + areaW * (1 - k) / 2);
+      } else {
+        // Veldig lang del: del opp over flere sider.
+        const slicePx = Math.floor(areaH * cv.width / areaW);
+        const px = cv.width / 1047; // canvas-piksler per skjermpiksel
+        for (let y = 0; y < cv.height;) {
+          let end = Math.min(y + slicePx, cv.height);
+          if (end < cv.height) {
+            const cut = Math.max(...cv.cuts.map((c) => Math.round(c * px)).filter((c) => c > y + slicePx / 2 && c <= end));
+            if (isFinite(cut)) end = cut;
+          }
+          const part = document.createElement('canvas');
+          part.width = cv.width;
+          part.height = end - y;
+          const ctx = part.getContext('2d');
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, part.width, part.height);
+          ctx.drawImage(cv, 0, -y);
+          addImg(part, areaW, part.height * areaW / cv.width, mx);
+          y = end;
+        }
       }
-    }).save();
+    }
+    // Topp- og bunntekst på hver side.
+    const text = runningText();
+    const n = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= n; i++) {
+      pdf.setPage(i);
+      pdf.setDrawColor(47, 72, 88);
+      pdf.setLineWidth(0.3);
+      pdf.line(mx, 10, W - mx, 10);
+      pdf.line(mx, H - 10, W - mx, H - 10);
+      pdf.setFontSize(8);
+      pdf.setTextColor(47, 72, 88);
+      pdf.text(text, mx, 7.5);
+      pdf.text(text, mx, H - 5.5);
+      pdf.setTextColor(184, 104, 74);
+      pdf.text(`Side ${i} av ${n}`, W - mx, H - 5.5, { align: 'right' });
+    }
+    pdf.save(fileName());
   }
 
   window.Print = { print, download, fileName, esc, shortDate, textOn };

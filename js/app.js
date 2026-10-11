@@ -817,6 +817,6 @@
     renderAll();
   }
 
-  window.App = { currentTeams, teamMap, matchCounts, refCounts, familyMap };
+  window.App = { currentTeams, teamLabel, teamMap, matchCounts, refCounts, familyMap };
   document.addEventListener('DOMContentLoaded', init);
 })();
