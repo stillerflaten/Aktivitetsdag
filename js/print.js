@@ -15,10 +15,17 @@
     return (r * 299 + g * 587 + b * 114) / 1000 > 140 ? '#111' : '#fff';
   }
 
+  // Logoen «Banen» som innebygd SVG, så den kommer med både i utskrift og nedlastet PDF.
+  const LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><rect width="1024" height="1024" rx="225" fill="#2F4858"/>'
+    + '<g fill="none" stroke="#EDE6DA" stroke-width="40" stroke-linecap="round"><rect x="212" y="292" width="600" height="440" rx="110"/>'
+    + '<line x1="512" y1="292" x2="512" y2="732"/><circle cx="512" cy="512" r="96"/></g><circle cx="666" cy="420" r="46" fill="#E3A587"/></svg>';
+  const LOGO = `<img class="p-logo" alt="" width="40" height="40" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(LOGO_SVG)}">`;
+
   function heading(title, sub) {
     const e = S.event;
-    const place = [e.title || 'Aktivitetsdag', e.place, shortDate(e.date)].filter(Boolean).join(' ');
-    return `<div class="p-head"><div class="p-title">${esc(place)}</div><div class="p-sub">${esc(sub || title)}</div></div>`;
+    const meta = [e.place, shortDate(e.date), e.club].filter(Boolean).join('  ·  ');
+    return `<div class="p-head">${LOGO}<div class="p-head-text"><div class="p-sub">${esc(sub || title)}</div>`
+      + `<div class="p-title">${esc(e.title || 'Aktivitetsdag')}</div><div class="p-meta">${esc(meta)}</div></div></div>`;
   }
 
   function lag() {
@@ -28,7 +35,7 @@
     const cols = teams.map((t) => `
       <div class="p-team" style="--c:${esc(t.color)}">
         <div class="p-team-name" style="background:${esc(t.color)};color:${textOn(t.color)}">${esc(club + t.name + age)}</div>
-        <div class="p-team-coach">${esc(t.coaches) || '&nbsp;'}</div>
+        ${t.coaches ? `<div class="p-team-coach">${esc(t.coaches)}</div>` : ''}
         <ol>${t.players.map((p) => `<li>${esc(p.name)}</li>`).join('')}</ol>
       </div>`).join('');
     return `<section class="p-page">${heading('', 'LAGINNDELING')}<div class="p-teams">${cols || '<p>Ingen laginndeling ennå.</p>'}</div></section>`;
@@ -164,10 +171,16 @@
       const h = pdf.internal.pageSize.getHeight();
       for (let i = 1; i <= n; i++) {
         pdf.setPage(i);
-        pdf.setFontSize(8.5);
-        pdf.setTextColor(95, 107, 114);
-        pdf.text(text, w / 2, 8, { align: 'center' });
-        pdf.text(text, w / 2, h - 6, { align: 'center' });
+        pdf.setDrawColor(47, 72, 88);
+        pdf.setLineWidth(0.3);
+        pdf.line(10, 10, w - 10, 10);
+        pdf.line(10, h - 10, w - 10, h - 10);
+        pdf.setFontSize(8);
+        pdf.setTextColor(47, 72, 88);
+        pdf.text(text, 10, 7.5);
+        pdf.text(text, 10, h - 5.5);
+        pdf.setTextColor(184, 104, 74);
+        pdf.text(`Side ${i} av ${n}`, w - 10, h - 5.5, { align: 'right' });
       }
     }).save();
   }
