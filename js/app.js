@@ -11,7 +11,7 @@
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => t.classList.remove('show'), 3500);
+    toast.timer = setTimeout(() => t.classList.remove('show'), Math.max(3500, msg.length * 60));
   }
 
   function getPath(obj, path) {
@@ -145,7 +145,13 @@
 
   // ---------- Tegning av sidene ----------
 
+  function renderSport() {
+    const found = Store.SPORTS.find(([name]) => name === S.event.sport);
+    $('#sport-icon').textContent = found ? found[1] : '⭐';
+  }
+
   function renderBinds() {
+    renderSport();
     for (const el of $$('[data-bind]')) {
       if (el === document.activeElement) continue;
       const v = getPath(S, el.dataset.bind);
@@ -450,8 +456,23 @@
     const pul = Algo.puljer(teams, S.schedule.banes);
     const thin = pul.filter((p) => p.teams.length < 2);
     S.schedule.matches = Algo.makeSchedule(teams, S.schedule.banes, matchSlots().map((s) => s.id), S.schedule);
+    const counts = matchCounts();
+    const uneven = pul.filter((p) => {
+      const g = p.teams.map((t) => counts[t.id] || 0);
+      return g.length && Math.max(...g) !== Math.min(...g);
+    });
     if (thin.length) {
       toast(`Obs: ${thin.map((p) => p.label || 'baner uten klasse').join(', ')} har færre enn to lag. Sjekk klassene.`);
+    } else if (S.schedule.equalGames && uneven.length) {
+      toast('Klarte ikke helt å gi alle like mange kamper. Prøv å endre antall kamprunder eller baner.');
+    } else if (S.schedule.equalGames) {
+      const g = pul.map((p) => counts[(p.teams[0] || {}).id] || 0);
+      let empty = 0;
+      for (const slot of matchSlots()) {
+        for (const p of pul) if (p.teams.length >= 2) empty += p.banes.filter((b) => !(S.schedule.matches[slot.id] || {})[b]).length;
+      }
+      toast(`Nytt kampoppsett laget. Alle lag får ${[...new Set(g)].join('/')} kamper.` +
+        (empty ? ` ${empty} baneplass${empty === 1 ? '' : 'er'} står tomme. Prøv gjerne med flere eller færre kamprunder.` : ''));
     } else {
       toast('Nytt kampoppsett laget.');
     }
@@ -614,9 +635,17 @@
   // ---------- Oppstart ----------
 
   function init() {
+    $('#sport-select').insertAdjacentHTML('beforeend',
+      Store.SPORTS.map(([name, icon]) => `<option value="${esc(name)}">${icon} ${esc(name)}</option>`).join(''));
+
     document.addEventListener('click', (e) => {
-      const tab = e.target.closest('.tab');
-      if (tab) { showTab(tab.dataset.tab); return; }
+      const tab = e.target.closest('.tab, [data-goto]');
+      if (tab) {
+        e.preventDefault();
+        showTab(tab.dataset.tab || tab.dataset.goto);
+        window.scrollTo(0, 0);
+        return;
+      }
 
       const pr = e.target.closest('[data-print]');
       if (pr) { Print.print([pr.dataset.print]); return; }

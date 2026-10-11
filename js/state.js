@@ -2,8 +2,12 @@
 (function () {
   const KEY = 'aktivitetsdag.v1';
 
-  const COLORS = ['#e53935', '#90b4f0', '#ffe14d', '#7cc58b', '#f4a259', '#b39ddb', '#4dd0e1', '#f48fb1', '#a1887f', '#cfd8dc'];
-  const TEAM_NAMES = ['Capitals', 'Mammoth', 'Predators', 'Kraken', 'Stars', 'Ducks', 'Flames', 'Leafs', 'Lightning', 'Sharks'];
+  const COLORS = ['#ef5350', '#42a5f5', '#ffd54f', '#66bb6a', '#ffa726', '#ab47bc', '#26c6da', '#f06292', '#8d6e63', '#78909c'];
+  const TEAM_NAMES = ['Ørn', 'Ulv', 'Bjørn', 'Rev', 'Gaupe', 'Elg', 'Ugle', 'Oter', 'Hare', 'Ekorn'];
+  const SPORTS = [
+    ['Fotball', '⚽'], ['Håndball', '🤾'], ['Ishockey', '🏒'], ['Bandy', '🏑'], ['Innebandy', '🏑'],
+    ['Basketball', '🏀'], ['Volleyball', '🏐'], ['Hockey (landhockey)', '🏑'], ['Rugby', '🏉'], ['Annen idrett', '⭐']
+  ];
 
   let seq = Date.now();
   function uid(prefix) {
@@ -22,7 +26,7 @@
       ['Kiosk', '09:00-11:00', 2],
       ['Kiosk', '11:00-13:00', 2],
       ['Sekretariat / tidtaking', '09:30-13:00', 1],
-      ['Opprigg av vant og mål', '09:00-09:30', 3],
+      ['Opprigg av baner og utstyr', '09:00-09:30', 3],
       ['Nedrigg og rydding', '13:05-13:45', 3],
       ['Kakebaking', '', 3],
       ['Garderobevakt', '09:00-13:00', 1]
@@ -32,7 +36,7 @@
   function defaults() {
     return {
       version: 1,
-      event: { title: 'Aktivitetsdag', date: nextSaturday(), place: '', club: '', ageGroup: '' },
+      event: { title: 'Aktivitetsdag', sport: '', date: nextSaturday(), place: '', club: '', ageGroup: '' },
       players: [],
       teams: {
         mode: 'size',
@@ -46,11 +50,13 @@
         includeOwn: true,
         guests: [], // { id, name, club, klasse }
         banes: [{ id: uid('b'), name: 'Bane 1', klasse: '' }, { id: uid('b'), name: 'Bane 2', klasse: '' }],
-        timing: { start: '09:30', matchMin: 15, breakMin: 10, rounds: 8, endLabel: 'Premieutdeling, nedrigg', endMin: 40 },
+        timing: { start: '09:30', matchMin: 15, breakMin: 10, rounds: 8, endLabel: 'Premieutdeling og rydding', endMin: 40 },
         slots: [], // { id, from, to, type: 'match'|'break', label }
         matches: {}, // slotId -> baneId -> [lagA, lagB]
         avoidSameClub: true,
-        avoidBackToBack: true
+        avoidBackToBack: true,
+        avoidThreeInRow: true,
+        equalGames: false
       },
       tasks: defaultTasks(),
       refs: {
@@ -104,5 +110,5 @@
   }
 
   window.S = load();
-  window.Store = { uid, save, replace, reset, defaults, defaultTasks, COLORS, TEAM_NAMES };
+  window.Store = { uid, save, replace, reset, defaults, defaultTasks, COLORS, TEAM_NAMES, SPORTS };
 })();
