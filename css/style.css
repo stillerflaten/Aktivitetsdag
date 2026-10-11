@@ -48,6 +48,8 @@ h2 { font-size: 1.15rem; font-weight: 800; margin: 18px 0 8px; }
 h2:first-child { margin-top: 0; }
 h3 { font-size: 1rem; margin: 14px 0 6px; }
 .muted { color: var(--muted); font-size: .9rem; }
+.info { background: var(--accent-soft); border-radius: 10px; padding: 8px 12px; font-weight: 600; margin: 10px 0; }
+.info:empty { display: none; }
 small { font-weight: normal; opacity: .8; }
 a { color: var(--accent); }
 

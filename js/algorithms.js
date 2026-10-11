@@ -135,8 +135,9 @@
     // Med «like mange kamper» får ingen lag flere kamper enn alle kan få.
     // Noen baner kan da stå tomme i enkelte runder.
     let cap = Infinity;
+    if (opts.targetGames) cap = opts.targetGames;
     if (opts.equalGames) {
-      cap = Math.floor((slotIds.length * nB * 2) / ids.length);
+      cap = Math.min(cap, Math.floor((slotIds.length * nB * 2) / ids.length));
       if ((cap * ids.length) % 2) cap--;
     }
 
