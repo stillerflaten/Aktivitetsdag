@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aktivitetsdag – barneishockey</title>
+  <meta name="description" content="Laginndeling, kampoppsett, oppgavefordeling og dommeroppsett for aktivitetsdager i barneishockey.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%92%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🏒 <span>Aktivitetsdag</span></div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" data-tab="dag" role="tab">Dagen</button>
+      <button class="tab" data-tab="lag" role="tab">Laginndeling</button>
+      <button class="tab" data-tab="kamp" role="tab">Kampoppsett</button>
+      <button class="tab" data-tab="oppgaver" role="tab">Oppgaver</button>
+      <button class="tab" data-tab="dommer" role="tab">Dommere</button>
+    </nav>
+    <button class="btn primary" id="btn-export">📄 PDF</button>
+  </header>
+
+  <main id="app">
+    <!-- DAGEN -->
+    <section class="page" id="page-dag">
+      <h1>Om aktivitetsdagen</h1>
+      <div class="card">
+        <div class="grid2">
+          <label>Tittel<input data-bind="event.title" placeholder="Aktivitetsdag"></label>
+          <label>Dato<input type="date" data-bind="event.date"></label>
+          <label>Sted / ishall<input data-bind="event.place" placeholder="Dalgård ishall"></label>
+          <label>Egen klubb<input data-bind="event.club" placeholder="Astor"></label>
+          <label>Årsklasse for egne lag<input data-bind="event.ageGroup" placeholder="U9"></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Ny aktivitetsdag og rullering</h2>
+        <p class="muted">Når en aktivitetsdag er ferdig, lagrer du den i historikken. Neste gang du lager laginndeling, prøver siden å blande spillerne slik at de får nye lagkamerater, og foreldre som hadde oppgaver sist blir spart neste gang.</p>
+        <div class="row">
+          <button class="btn" id="btn-archive">💾 Lagre dagen i historikken</button>
+          <button class="btn" id="btn-newday">➕ Start ny aktivitetsdag</button>
+        </div>
+        <div id="history-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Lagre og dele</h2>
+        <p class="muted">Alt lagres automatisk i denne nettleseren. Vil du bruke det på en annen maskin, eller dele med en annen trener, lagrer du en fil og åpner den der.</p>
+        <div class="row">
+          <button class="btn" id="btn-save-file">⬇️ Lagre til fil</button>
+          <label class="btn">⬆️ Åpne fil<input type="file" id="file-open" accept=".json,application/json" hidden></label>
+          <button class="btn danger" id="btn-reset">🗑️ Slett alt</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAGINNDELING -->
+    <section class="page" id="page-lag">
+      <div class="page-head">
+        <h1>Laginndeling</h1>
+        <button class="btn" data-print="lag">📄 PDF av laginndeling</button>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Spillere <span class="badge" id="player-count"></span></h2>
+          <p class="muted">Lim inn en liste med navn (ett per linje), eller legg til én og én. Fjern haken for de som ikke er med denne dagen.</p>
+          <textarea id="player-paste" rows="3" placeholder="Ola Nordmann&#10;Kari Nordmann&#10;…"></textarea>
+          <div class="row">
+            <button class="btn" id="btn-add-players">Legg til navn</button>
+          </div>
+          <table class="list" id="player-table">
+            <thead><tr><th>Med</th><th>Navn</th><th>Foresatte <span class="muted">(valgfritt)</span></th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h2>Lag</h2>
+          <div class="grid2">
+            <label>Del inn etter
+              <select data-bind="teams.mode">
+                <option value="size">Antall spillere per lag</option>
+                <option value="count">Antall lag</option>
+              </select>
+            </label>
+            <label id="lbl-perteam">Maks spillere per lag<input type="number" min="1" max="30" data-bind="teams.perTeam" data-type="number"></label>
+            <label id="lbl-count">Antall lag<input type="number" min="1" max="20" data-bind="teams.count" data-type="number"></label>
+            <label>Rullering
+              <select data-bind="teams.method">
+                <option value="mix">Nye lagkamerater fra gang til gang</option>
+                <option value="random">Helt tilfeldig</option>
+              </select>
+            </label>
+          </div>
+          <p class="muted" id="team-info"></p>
+          <table class="list" id="team-table">
+            <thead><tr><th>Farge</th><th>Lagnavn</th><th>Trenere</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="row">
+            <button class="btn primary" id="btn-make-teams">🎲 Lag laginndeling</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Resultat</h2>
+        <p class="muted">Du kan flytte spillere mellom lag med menyen ved hvert navn.</p>
+        <div id="team-result" class="team-grid"></div>
+        <p class="muted" id="team-repeat-info"></p>
+      </div>
+    </section>
+
+    <!-- KAMPOPPSETT -->
+    <section class="page" id="page-kamp">
+      <div class="page-head">
+        <h1>Kampoppsett</h1>
+        <button class="btn" data-print="kamp">📄 PDF av kampoppsett</button>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Lag som deltar</h2>
+          <label class="check"><input type="checkbox" data-bind="schedule.includeOwn"> Ta med egne lag fra laginndelingen</label>
+          <p class="muted">Skriv inn lagene som kommer på besøk (og eventuelt egne lag i andre årsklasser). Klasse brukes til å plassere lag på riktig bane.</p>
+          <table class="list" id="guest-table">
+            <thead><tr><th>Lagnavn</th><th>Klubb</th><th>Klasse</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="row"><button class="btn" id="btn-add-guest">➕ Legg til lag</button></div>
+        </div>
+
+        <div class="card">
+          <h2>Baner</h2>
+          <table class="list" id="bane-table">
+            <thead><tr><th>Bane</th><th>Klasse</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="row"><button class="btn" id="btn-add-bane">➕ Legg til bane</button></div>
+
+          <h2>Tidspunkter</h2>
+          <div class="grid3">
+            <label>Første kamp<input type="time" data-bind="schedule.timing.start"></label>
+            <label>Kamplengde (min)<input type="number" min="1" data-bind="schedule.timing.matchMin" data-type="number"></label>
+            <label>Pause mellom (min)<input type="number" min="0" data-bind="schedule.timing.breakMin" data-type="number"></label>
+            <label>Antall kamprunder<input type="number" min="1" max="40" data-bind="schedule.timing.rounds" data-type="number"></label>
+            <label>Avslutning (tekst)<input data-bind="schedule.timing.endLabel" placeholder="Premieutdeling, nedrigg"></label>
+            <label>Avslutning (min)<input type="number" min="0" data-bind="schedule.timing.endMin" data-type="number"></label>
+          </div>
+          <div class="row"><button class="btn" id="btn-gen-times">⏱️ Lag tidspunkter</button></div>
+          <p class="muted">Du kan også endre hvert tidspunkt direkte i tabellen under, og legge inn pauser (f.eks. vanning) der du vil.</p>
+
+          <h2>Regler</h2>
+          <label class="check"><input type="checkbox" data-bind="schedule.avoidSameClub"> Unngå kamper mellom lag fra samme klubb</label>
+          <label class="check"><input type="checkbox" data-bind="schedule.avoidBackToBack"> Unngå at et lag spiller to kamper på rad</label>
+          <div class="row"><button class="btn primary" id="btn-make-schedule">🎲 Lag kampoppsett</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Oppsett</h2>
+        <div class="table-wrap"><table class="grid" id="schedule-table"></table></div>
+        <div class="row"><button class="btn" id="btn-add-slot">➕ Legg til kamprunde</button> <button class="btn" id="btn-add-break">➕ Legg til pause</button></div>
+        <h2>Antall kamper per lag</h2>
+        <div id="match-count"></div>
+      </div>
+    </section>
+
+    <!-- OPPGAVER -->
+    <section class="page" id="page-oppgaver">
+      <div class="page-head">
+        <h1>Oppgavefordeling for foreldre</h1>
+        <button class="btn" data-print="oppgaver">📄 PDF av oppgaver</button>
+      </div>
+      <div class="card">
+        <p class="muted">Hver spiller regnes som én familie. Skriv gjerne navn på foresatte under Laginndeling, så kommer de med her. Familier som har hatt flest oppgaver tidligere (i historikken) blir spart først.</p>
+        <div class="table-wrap">
+          <table class="list" id="task-table">
+            <thead><tr><th>Oppgave</th><th>Tidspunkt</th><th>Antall</th><th>Ansvarlige</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="row">
+          <button class="btn" id="btn-add-task">➕ Legg til oppgave</button>
+          <button class="btn primary" id="btn-fill-tasks">🎲 Fordel oppgaver</button>
+          <button class="btn" id="btn-clear-tasks">Tøm fordeling</button>
+        </div>
+        <p class="muted" id="task-info"></p>
+      </div>
+    </section>
+
+    <!-- DOMMERE -->
+    <section class="page" id="page-dommer">
+      <div class="page-head">
+        <h1>Dommeroppsett</h1>
+        <button class="btn" data-print="dommer">📄 PDF av dommeroppsett</button>
+      </div>
+      <div class="cols">
+        <div class="card">
+          <h2>Dommere</h2>
+          <textarea id="ref-paste" rows="3" placeholder="Ett navn per linje"></textarea>
+          <div class="row"><button class="btn" id="btn-add-refs">Legg til navn</button></div>
+          <table class="list" id="ref-table">
+            <thead><tr><th>Navn</th><th>Kamper</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>Innstillinger</h2>
+          <div class="grid2">
+            <label>Dommere per kamp<input type="number" min="1" max="3" data-bind="refs.perMatch" data-type="number"></label>
+            <label>Kamper på rad på samme bane<input type="number" min="1" max="10" data-bind="refs.block" data-type="number"></label>
+          </div>
+          <p class="muted">Dommerne fordeles så likt som mulig, og ingen dommer settes opp på to baner samtidig.</p>
+          <div class="row"><button class="btn primary" id="btn-make-refs">🎲 Lag dommeroppsett</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Oppsett</h2>
+        <div class="table-wrap"><table class="grid" id="ref-schedule"></table></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Eksport-dialog -->
+  <dialog id="export-dialog">
+    <form method="dialog">
+      <h2>Lag PDF</h2>
+      <p class="muted">Velg hva som skal være med. Trykk så «Lag PDF», og velg <b>Lagre som PDF</b> i utskriftsvinduet.</p>
+      <label class="check"><input type="checkbox" name="lag" checked> Laginndeling</label>
+      <label class="check"><input type="checkbox" name="kamp" checked> Kampoppsett</label>
+      <label class="check"><input type="checkbox" name="oppgaver" checked> Oppgavefordeling</label>
+      <label class="check"><input type="checkbox" name="dommer" checked> Dommeroppsett</label>
+      <div class="row end">
+        <button class="btn" value="cancel">Avbryt</button>
+        <button class="btn primary" value="ok">Lag PDF</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="print-area"></div>
+  <div id="toast" role="status"></div>
+
+  <script src="js/state.js"></script>
+  <script src="js/algorithms.js"></script>
+  <script src="js/print.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
