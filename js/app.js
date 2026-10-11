@@ -11,7 +11,7 @@
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => t.classList.remove('show'), 3500);
+    toast.timer = setTimeout(() => t.classList.remove('show'), Math.max(3500, msg.length * 60));
   }
 
   function getPath(obj, path) {
@@ -456,8 +456,23 @@
     const pul = Algo.puljer(teams, S.schedule.banes);
     const thin = pul.filter((p) => p.teams.length < 2);
     S.schedule.matches = Algo.makeSchedule(teams, S.schedule.banes, matchSlots().map((s) => s.id), S.schedule);
+    const counts = matchCounts();
+    const uneven = pul.filter((p) => {
+      const g = p.teams.map((t) => counts[t.id] || 0);
+      return g.length && Math.max(...g) !== Math.min(...g);
+    });
     if (thin.length) {
       toast(`Obs: ${thin.map((p) => p.label || 'baner uten klasse').join(', ')} har færre enn to lag. Sjekk klassene.`);
+    } else if (S.schedule.equalGames && uneven.length) {
+      toast('Klarte ikke helt å gi alle like mange kamper. Prøv å endre antall kamprunder eller baner.');
+    } else if (S.schedule.equalGames) {
+      const g = pul.map((p) => counts[(p.teams[0] || {}).id] || 0);
+      let empty = 0;
+      for (const slot of matchSlots()) {
+        for (const p of pul) if (p.teams.length >= 2) empty += p.banes.filter((b) => !(S.schedule.matches[slot.id] || {})[b]).length;
+      }
+      toast(`Nytt kampoppsett laget. Alle lag får ${[...new Set(g)].join('/')} kamper.` +
+        (empty ? ` ${empty} baneplass${empty === 1 ? '' : 'er'} står tomme. Prøv gjerne med flere eller færre kamprunder.` : ''));
     } else {
       toast('Nytt kampoppsett laget.');
     }

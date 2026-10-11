@@ -3,7 +3,7 @@
 En enkel nettside som hjelper trenere å planlegge aktivitetsdager i barneidrett, enten det er ishockey, fotball, håndball eller noe annet:
 
 - **Laginndeling** – velg antall spillere per lag (eller antall lag). Siden blander spillerne slik at de får nye lagkamerater fra gang til gang.
-- **Kampoppsett** – legg inn lagene som kommer på besøk, baner og tidspunkter. Siden lager et oppsett der alle lag får like mange kamper, helst mot andre klubber og uten to (eller tre) kamper på rad.
+- **Kampoppsett** – legg inn lagene som kommer på besøk, baner og tidspunkter. Siden lager et oppsett der alle lag får like mange kamper, helst mot andre klubber og uten to (eller tre) kamper på rad. Du kan også kreve at alle lag spiller nøyaktig like mange kamper.
 - **Oppgaver** – fordeler oppgaver (kiosk, opprigg, kakebaking …) mellom foreldrene, og sparer de som hadde oppgaver sist.
 - **Dommere** – fordeler dommere på kampene så likt som mulig.
 - **Regler og råd** – kortversjon av idrettens barnerettigheter og bestemmelser om barneidrett (NIF), med lenke til originalen.
