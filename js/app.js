@@ -585,8 +585,17 @@
     if (!S.refs.people.length) { toast('Legg inn dommere først.'); return; }
     if (!matchSlots().length) { toast('Lag kampoppsettet først.'); return; }
     S.refs.assignment = Algo.makeRefs(S.refs.people, S.schedule.banes.map((b) => b.id), matchSlots().map((s) => s.id),
-      S.schedule.matches, Math.max(1, S.refs.perMatch || 1), Math.max(1, S.refs.block || 1));
-    toast('Nytt dommeroppsett laget.');
+      S.schedule.matches, Math.max(1, S.refs.perMatch || 1), Math.max(1, S.refs.block || 1), S.refs.sameBane);
+    if (S.refs.sameBane) {
+      const groups = Algo.refGroups(S.refs.people, S.schedule.banes.map((b) => b.id), matchSlots().map((s) => s.id), S.schedule.matches);
+      const per = Math.max(1, S.refs.perMatch || 1);
+      const short = S.schedule.banes.filter((b) => groups[b.id] && groups[b.id].length < per);
+      toast(short.length
+        ? `Nytt dommeroppsett laget, men det er for få dommere: ${short.map((b) => b.name).join(', ')} mangler dommer. Legg til flere, eller skru av «samme bane hele dagen».`
+        : 'Nytt dommeroppsett laget. Hver dommer holder seg på sin bane.');
+    } else {
+      toast('Nytt dommeroppsett laget.');
+    }
   }
 
   function fillTasks() {
