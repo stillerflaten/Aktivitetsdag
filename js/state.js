@@ -50,7 +50,7 @@
         includeOwn: true,
         guests: [], // { id, name, club, klasse }
         banes: [{ id: uid('b'), name: 'Bane 1', klasse: '' }, { id: uid('b'), name: 'Bane 2', klasse: '' }],
-        timing: { start: '09:30', matchMin: 15, breakMin: 10, rounds: 8, endLabel: 'Premieutdeling og rydding', endMin: 40 },
+        timing: { mode: 'games', gamesPerTeam: 4, start: '09:30', matchMin: 15, breakMin: 10, rounds: 8, endLabel: 'Premieutdeling og rydding', endMin: 40 },
         slots: [], // { id, from, to, type: 'match'|'break', label }
         matches: {}, // slotId -> baneId -> [lagA, lagB]
         avoidSameClub: true,

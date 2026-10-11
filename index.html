@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
-  <link rel="stylesheet" href="css/style.css?v=2026-10-11c">
+  <link rel="stylesheet" href="css/style.css?v=2026-10-11d">
 </head>
 <body>
   <header class="topbar">
@@ -160,16 +160,26 @@
           <div class="row"><button class="btn" id="btn-add-bane">➕ Legg til bane</button></div>
 
           <h2>Tidspunkter</h2>
+          <div class="grid2">
+            <label>Hvor mange kamper?
+              <select data-bind="schedule.timing.mode">
+                <option value="games">Velg antall kamper per lag</option>
+                <option value="rounds">Velg antall kamprunder</option>
+              </select>
+            </label>
+            <label id="lbl-games">Kamper per lag<input type="number" min="1" max="20" data-bind="schedule.timing.gamesPerTeam" data-type="number"></label>
+            <label id="lbl-rounds">Antall kamprunder<input type="number" min="1" max="40" data-bind="schedule.timing.rounds" data-type="number"></label>
+          </div>
+          <p class="info" id="rounds-info"></p>
           <div class="grid3">
             <label>Første kamp<input type="time" data-bind="schedule.timing.start"></label>
             <label>Kamplengde (min)<input type="number" min="1" data-bind="schedule.timing.matchMin" data-type="number"></label>
             <label>Pause mellom (min)<input type="number" min="0" data-bind="schedule.timing.breakMin" data-type="number"></label>
-            <label>Antall kamprunder<input type="number" min="1" max="40" data-bind="schedule.timing.rounds" data-type="number"></label>
             <label>Avslutning (tekst)<input data-bind="schedule.timing.endLabel" placeholder="Premieutdeling og rydding"></label>
             <label>Avslutning (min)<input type="number" min="0" data-bind="schedule.timing.endMin" data-type="number"></label>
           </div>
           <div class="row"><button class="btn" id="btn-gen-times">⏱️ Lag tidspunkter</button></div>
-          <p class="muted">Du kan også endre hvert tidspunkt direkte i tabellen under, og legge inn pauser (f.eks. vanning) der du vil.</p>
+          <p class="muted">En <b>kamprunde</b> er ett tidspunkt der alle banene spiller samtidig. Du kan også endre hvert tidspunkt direkte i tabellen under, og legge inn pauser (f.eks. vanning) der du vil.</p>
 
           <h2>Regler</h2>
           <label class="check"><input type="checkbox" data-bind="schedule.avoidSameClub"> Unngå kamper mellom lag fra samme klubb</label>
@@ -322,9 +332,9 @@
   <div id="print-area"></div>
   <div id="toast" role="status"></div>
 
-  <script src="js/state.js?v=2026-10-11c"></script>
-  <script src="js/algorithms.js?v=2026-10-11c"></script>
-  <script src="js/print.js?v=2026-10-11c"></script>
-  <script src="js/app.js?v=2026-10-11c"></script>
+  <script src="js/state.js?v=2026-10-11d"></script>
+  <script src="js/algorithms.js?v=2026-10-11d"></script>
+  <script src="js/print.js?v=2026-10-11d"></script>
+  <script src="js/app.js?v=2026-10-11d"></script>
 </body>
 </html>

@@ -271,7 +271,21 @@
       <input data-path="schedule.slots.${i}.to" value="${esc(slot.to)}" inputmode="numeric" placeholder="09:45" aria-label="Til"></td>`;
   }
 
+  function renderRoundsInfo() {
+    const t = S.schedule.timing;
+    $('#lbl-games').hidden = !gamesMode();
+    $('#lbl-rounds').hidden = gamesMode();
+    const start = toMin(t.start);
+    const r = plannedRounds();
+    const end = start == null ? null : start + r * ((t.matchMin || 0) + (t.breakMin || 0)) - (t.breakMin || 0);
+    const time = end == null ? '' : ` Siste kamp er ferdig kl. ${fromMin(end)}.`;
+    $('#rounds-info').textContent = gamesMode()
+      ? `Det trengs ${r} kamprunde${r === 1 ? '' : 'r'} for at alle lag skal få ${t.gamesPerTeam || 1} kamper.${time}`
+      : `${r} kamprunde${r === 1 ? '' : 'r'}.${time}`;
+  }
+
   function renderSchedule() {
+    renderRoundsInfo();
     const sch = S.schedule;
     const banes = sch.banes;
     const opts = baneTeamOptions();
@@ -431,8 +445,26 @@
     toast('Ny laginndeling laget.');
   }
 
-  function genTimes() {
+  const gamesMode = () => S.schedule.timing.mode === 'games';
+
+  // Antall kamprunder som trengs. Med «kamper per lag» regnes det ut fra lag og baner i hver pulje.
+  function plannedRounds() {
     const t = S.schedule.timing;
+    if (!gamesMode()) return Math.max(1, t.rounds || 1);
+    const g = Math.max(1, t.gamesPerTeam || 1);
+    let rounds = 1;
+    for (const p of Algo.puljer(Object.values(teamMap()), S.schedule.banes)) {
+      const nB = Math.min(p.banes.length, Math.floor(p.teams.length / 2));
+      if (nB < 1) continue;
+      rounds = Math.max(rounds, Math.ceil(Math.ceil((p.teams.length * g) / 2) / nB));
+    }
+    return rounds;
+  }
+
+  const timingKey = () => JSON.stringify({ ...S.schedule.timing, rounds: plannedRounds() });
+
+  function genTimes() {
+    const t = { ...S.schedule.timing, rounds: plannedRounds() };
     let start = toMin(t.start);
     if (start == null) { toast('Skriv inn tidspunkt for første kamp.'); return; }
     const oldMatch = matchSlots();
@@ -446,19 +478,20 @@
       slots.push({ id: Store.uid('s'), type: 'break', from: fromMin(from), to: t.endMin ? fromMin(from + t.endMin) : '', label: t.endLabel.trim() });
     }
     S.schedule.slots = slots;
-    S.schedule.timingUsed = JSON.stringify(t);
+    S.schedule.timingUsed = timingKey();
     toast(`${t.rounds} kamprunder laget.`);
   }
 
   function makeSchedule() {
     // Er tidsinnstillingene (f.eks. antall kamprunder) endret siden tidspunktene ble laget,
     // lages tidspunktene på nytt først. Ellers ville oppsettet brukt de gamle rundene.
-    if (!matchSlots().length || S.schedule.timingUsed !== JSON.stringify(S.schedule.timing)) genTimes();
+    if (!matchSlots().length || S.schedule.timingUsed !== timingKey()) genTimes();
     const teams = Object.values(teamMap());
     if (teams.length < 2) { toast('Det trengs minst to lag. Lag laginndeling eller legg til besøkende lag.'); return; }
     const pul = Algo.puljer(teams, S.schedule.banes);
     const thin = pul.filter((p) => p.teams.length < 2);
-    S.schedule.matches = Algo.makeSchedule(teams, S.schedule.banes, matchSlots().map((s) => s.id), S.schedule);
+    S.schedule.matches = Algo.makeSchedule(teams, S.schedule.banes, matchSlots().map((s) => s.id),
+      { ...S.schedule, targetGames: gamesMode() ? Math.max(1, S.schedule.timing.gamesPerTeam || 1) : null });
     const counts = matchCounts();
     const uneven = pul.filter((p) => {
       const g = p.teams.map((t) => counts[t.id] || 0);
@@ -466,6 +499,11 @@
     });
     if (thin.length) {
       toast(`Obs: ${thin.map((p) => p.label || 'baner uten klasse').join(', ')} har færre enn to lag. Sjekk klassene.`);
+    } else if (gamesMode() && S.schedule.equalGames && pul.some((p) => (p.teams.length * (S.schedule.timing.gamesPerTeam || 1)) % 2)) {
+      const p = pul.find((q) => (q.teams.length * (S.schedule.timing.gamesPerTeam || 1)) % 2);
+      const g = S.schedule.timing.gamesPerTeam || 1;
+      toast(`${p.teams.length} lag kan ikke spille ${g} kamper hver, fordi hver kamp har to lag. ` +
+        `Alle får derfor ${g - 1}. Velg ${g + 1} kamper, eller skru av «like mange kamper» så får ett lag én kamp mindre.`);
     } else if (S.schedule.equalGames && uneven.length) {
       toast('Klarte ikke helt å gi alle like mange kamper. Prøv å endre antall kamprunder eller baner.');
     } else if (S.schedule.equalGames) {
@@ -475,7 +513,7 @@
         for (const p of pul) if (p.teams.length >= 2) empty += p.banes.filter((b) => !(S.schedule.matches[slot.id] || {})[b]).length;
       }
       toast(`Nytt kampoppsett laget. Alle lag får ${[...new Set(g)].join('/')} kamper.` +
-        (empty ? ` ${empty} baneplass${empty === 1 ? '' : 'er'} står tomme. Prøv gjerne med flere eller færre kamprunder.` : ''));
+        (empty ? ` ${empty === 1 ? '1 baneplass står tom' : empty + ' baneplasser står tomme'} i løpet av dagen.` : ''));
     } else {
       toast('Nytt kampoppsett laget.');
     }
