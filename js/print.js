@@ -140,11 +140,15 @@
     return libPromise;
   }
 
-  function fileName() {
+  const NAMES = { lag: 'laginndeling', kamp: 'kampoppsett', oppgaver: 'oppgaver', dommer: 'dommeroppsett' };
+
+  // Én del får navnet sitt med i filnavnet, f.eks. aktivitetsdag-astor-2026-10-17-kampoppsett.pdf.
+  function fileName(sections) {
     const e = S.event;
+    const part = sections && sections.length === 1 ? NAMES[sections[0]] : '';
     const slug = (x) => (x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/å/g, 'a')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    return [slug(e.title) || 'aktivitetsdag', slug(e.club), e.date].filter(Boolean).join('-') + '.pdf';
+    return [slug(e.title) || 'aktivitetsdag', slug(e.club), e.date, part].filter(Boolean).join('-') + '.pdf';
   }
 
   // Diskret avsender nederst på hver PDF-side: Tillerflaten Design-logoen og navnet, med lenke til e-post.
@@ -247,7 +251,7 @@
       pdf.text(`Side ${i} av ${n}`, W - mx, H - 5.5, { align: 'right' });
       maker(pdf, W / 2, H - 5.5);
     }
-    pdf.save(fileName());
+    pdf.save(fileName(sections));
   }
 
   window.Print = { print, download, fileName, esc, shortDate, textOn };
