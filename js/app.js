@@ -446,11 +446,14 @@
       slots.push({ id: Store.uid('s'), type: 'break', from: fromMin(from), to: t.endMin ? fromMin(from + t.endMin) : '', label: t.endLabel.trim() });
     }
     S.schedule.slots = slots;
+    S.schedule.timingUsed = JSON.stringify(t);
     toast(`${t.rounds} kamprunder laget.`);
   }
 
   function makeSchedule() {
-    if (!matchSlots().length) genTimes();
+    // Er tidsinnstillingene (f.eks. antall kamprunder) endret siden tidspunktene ble laget,
+    // lages tidspunktene på nytt først. Ellers ville oppsettet brukt de gamle rundene.
+    if (!matchSlots().length || S.schedule.timingUsed !== JSON.stringify(S.schedule.timing)) genTimes();
     const teams = Object.values(teamMap());
     if (teams.length < 2) { toast('Det trengs minst to lag. Lag laginndeling eller legg til besøkende lag.'); return; }
     const pul = Algo.puljer(teams, S.schedule.banes);
