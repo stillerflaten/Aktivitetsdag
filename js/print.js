@@ -118,5 +118,59 @@
     setTimeout(() => window.print(), 50);
   }
 
-  window.Print = { print, esc, shortDate, textOn };
+  // «Lagre som PDF»: lager en ekte PDF-fil som lastes ned direkte (havner i Nedlastinger),
+  // uten utskriftsvinduet. Biblioteket (html2pdf.js) lastes først når knappen brukes.
+  let libPromise = null;
+  function loadLib() {
+    if (window.html2pdf) return Promise.resolve();
+    if (!libPromise) {
+      libPromise = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'js/vendor/html2pdf.bundle.min.js';
+        s.onload = resolve;
+        s.onerror = () => { libPromise = null; reject(new Error('lasting feilet')); };
+        document.head.appendChild(s);
+      });
+    }
+    return libPromise;
+  }
+
+  function fileName() {
+    const e = S.event;
+    const slug = (x) => (x || '').toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/å/g, 'a')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return [slug(e.title) || 'aktivitetsdag', slug(e.club), e.date].filter(Boolean).join('-') + '.pdf';
+  }
+
+  async function download(sections) {
+    await loadLib();
+    const el = document.createElement('div');
+    el.className = 'p-doc p-download';
+    // A4 liggende minus marger (277 mm) i skjermpiksler, så skriftstørrelsene blir som ved utskrift.
+    el.style.width = '1047px';
+    el.innerHTML = sections.map((s) => builders[s]()).join('<div class="html2pdf__page-break"></div>');
+    const text = runningText();
+    await window.html2pdf().set({
+      margin: [14, 10, 14, 10],
+      filename: fileName(),
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.p-team'] }
+    }).from(el).toPdf().get('pdf').then((pdf) => {
+      // Topp- og bunntekst på hver side.
+      const n = pdf.internal.getNumberOfPages();
+      const w = pdf.internal.pageSize.getWidth();
+      const h = pdf.internal.pageSize.getHeight();
+      for (let i = 1; i <= n; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8.5);
+        pdf.setTextColor(95, 107, 114);
+        pdf.text(text, w / 2, 8, { align: 'center' });
+        pdf.text(text, w / 2, h - 6, { align: 'center' });
+      }
+    }).save();
+  }
+
+  window.Print = { print, download, fileName, esc, shortDate, textOn };
 })();
