@@ -13,7 +13,8 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <meta name="theme-color" content="#2F4858">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
-  <link rel="stylesheet" href="css/style.css?v=2026-10-11q">
+  <script>try { var t = localStorage.getItem('aktivitetsdag.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
+  <link rel="stylesheet" href="css/style.css?v=2026-10-11r">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -26,6 +27,9 @@
       <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
       <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
       <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM3 7l9 6 9-6"/></symbol>
       <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
     </defs>
   </svg>
@@ -40,6 +44,7 @@
       <button class="tab" data-tab="regler" role="tab">Regler og råd</button>
     </nav>
     <div class="top-actions">
+      <button class="btn settings-btn" id="btn-settings" data-goto="innstillinger" title="Innstillinger og brukermanual" aria-label="Innstillinger og brukermanual"><svg class="i" aria-hidden="true"><use href="#i-gear"/></svg></button>
       <button class="btn" id="btn-export" title="Skriv ut eller velg hvilke sider som skal med"><svg class="i" aria-hidden="true"><use href="#i-print"/></svg> <span>Skriv ut</span></button>
       <button class="btn primary" id="btn-pdf-download" title="Last ned siden du står på som PDF (fra «Dagen»: alle sidene)"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg> <span>Lagre som PDF</span></button>
     </div>
@@ -91,16 +96,7 @@
         <div id="history-list"></div>
       </div>
 
-      <div class="card">
-        <h2>Lagre og dele</h2>
-        <p class="muted">Alt lagres automatisk i denne nettleseren. Vil du bruke det på en annen maskin, eller dele med en annen trener, lagrer du en fil og åpner den der.</p>
-        <div class="row">
-          <button class="btn" id="btn-save-file"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg> Lagre til fil</button>
-          <button class="btn" data-pdf-download><svg class="i" aria-hidden="true"><use href="#i-file"/></svg> Lagre som PDF</button>
-          <label class="btn"><svg class="i" aria-hidden="true"><use href="#i-upload"/></svg> Åpne fil<input type="file" id="file-open" accept=".json,application/json" hidden></label>
-          <button class="btn danger" id="btn-reset"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg> Slett alt</button>
-        </div>
-      </div>
+      <p class="muted">Lagre til fil, åpne fil, utseende og brukermanualen finner du under <a href="#" data-goto="innstillinger">Innstillinger</a> (tannhjulet øverst).</p>
     </section>
 
     <!-- LAGINNDELING -->
@@ -341,6 +337,71 @@
         </div>
       </div>
     </section>
+    <!-- INNSTILLINGER -->
+    <section class="page" id="page-innstillinger">
+      <div class="page-head">
+        <h1>Innstillinger</h1>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Brukermanual</h2>
+          <p class="muted">Manualen viser steg for steg hvordan du planlegger en aktivitetsdag, med skjermbilder av alle sidene. Den passer fint å sende til andre trenere.</p>
+          <div class="row">
+            <a class="btn primary" href="docs/brukermanual.pdf" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-book"/></svg> Åpne brukermanualen (PDF)</a>
+          </div>
+          <h3>Kortversjonen</h3>
+          <ol class="steps">
+            <li><b>Dagen:</b> fyll inn tittel, idrett, dato, sted, klubb og årsklasse.</li>
+            <li><b>Laginndeling:</b> lim inn spillerne og trykk «Lag laginndeling».</li>
+            <li><b>Kampoppsett:</b> legg til besøkende lag, baner og tider, og trykk «Lag kampoppsett».</li>
+            <li><b>Oppgaver</b> og <b>Dommere:</b> fordel automatisk og juster for hånd.</li>
+            <li><b>Lagre som PDF</b> og del planen.</li>
+            <li>Etter dagen: lagre dagen i historikken og lagre til fil.</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h2>Utseende</h2>
+          <p class="muted">Gjelder bare denne nettleseren. Utskrifter og PDF er alltid lyse.</p>
+          <div class="seg" role="radiogroup" aria-label="Utseende">
+            <label><input type="radio" name="theme" value="auto"> <span>Automatisk</span></label>
+            <label><input type="radio" name="theme" value="light"> <span>Lys</span></label>
+            <label><input type="radio" name="theme" value="dark"> <span>Mørk</span></label>
+          </div>
+          <p class="muted">«Automatisk» følger innstillingen på maskinen eller telefonen.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Lagre og dele</h2>
+        <p class="muted">Alt lagres automatisk i denne nettleseren. Vil du bruke det på en annen maskin, eller dele med en annen trener, lagrer du en fil og åpner den der. Lagre gjerne til fil etter hver aktivitetsdag, så har du en sikkerhetskopi.</p>
+        <div class="row">
+          <button class="btn" id="btn-save-file"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg> Lagre til fil</button>
+          <label class="btn"><svg class="i" aria-hidden="true"><use href="#i-upload"/></svg> Åpne fil<input type="file" id="file-open" accept=".json,application/json" hidden></label>
+        </div>
+        <p class="muted">Filen inneholder navn på barn og foreldre. Del den bare med trenere som trenger den.</p>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Slett alt</h2>
+          <p class="muted">Fjerner spillere, lag, kampoppsett, historikk og alt annet fra denne nettleseren, for eksempel på en lånt PC. Det kan ikke angres, så lagre til fil først hvis du vil ta vare på det.</p>
+          <div class="row">
+            <button class="btn danger" id="btn-reset"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg> Slett alt</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Om Aktivitetsdag</h2>
+          <p class="muted">Ingen innlogging og ingen server. Det du skriver inn, blir værende i nettleseren din og sendes ikke til noen.</p>
+          <p class="muted">Laget av <b>Tillerflaten Digital</b>. Har du spørsmål, ønsker eller har funnet en feil, er det bare å ta kontakt.</p>
+          <div class="row">
+            <a class="btn" href="mailto:post@tillerflatendigital.no?subject=Aktivitetsdag"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg> Kontakt</a>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site-foot">
@@ -370,9 +431,9 @@
   <div id="print-area" class="p-doc"></div>
   <div id="toast" role="status"></div>
 
-  <script src="js/state.js?v=2026-10-11q"></script>
-  <script src="js/algorithms.js?v=2026-10-11q"></script>
-  <script src="js/print.js?v=2026-10-11q"></script>
-  <script src="js/app.js?v=2026-10-11q"></script>
+  <script src="js/state.js?v=2026-10-11r"></script>
+  <script src="js/algorithms.js?v=2026-10-11r"></script>
+  <script src="js/print.js?v=2026-10-11r"></script>
+  <script src="js/app.js?v=2026-10-11r"></script>
 </body>
 </html>

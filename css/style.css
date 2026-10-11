@@ -24,8 +24,9 @@
   --focus: 0 0 0 3px rgba(47, 72, 88, .18);
 }
 
+/* Mørke farger: automatisk etter maskinen, eller valgt under Innstillinger (data-theme på <html>). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #172229;
     --card: #1E2C35;
     --text: #ECE7DF;
@@ -42,6 +43,23 @@
     --shadow: none;
     --focus: 0 0 0 3px rgba(227, 165, 135, .3);
   }
+}
+:root[data-theme="dark"] {
+  --bg: #172229;
+  --card: #1E2C35;
+  --text: #ECE7DF;
+  --muted: #A3ADB2;
+  --line: #2F404B;
+  --field: #24343E;
+  --accent: #C9D6DC;
+  --accent-text: #172229;
+  --accent-soft: #263A45;
+  --highlight: #E3A587;
+  --danger: #E58B76;
+  --conflict: #5A3328;
+  --break: #2B3A40;
+  --shadow: none;
+  --focus: 0 0 0 3px rgba(227, 165, 135, .3);
 }
 
 * { box-sizing: border-box; }
@@ -94,6 +112,9 @@ a { color: var(--highlight); text-underline-offset: 2px; }
 .topbar .btn:hover { background: rgba(237, 230, 218, .18); border-color: rgba(237, 230, 218, .4); }
 .topbar .btn.primary { background: var(--cream); border-color: var(--cream); color: var(--ink-deep); }
 .topbar .btn.primary:hover { background: #fff; }
+
+.topbar .btn.settings-btn { padding-left: 10px; padding-right: 10px; }
+.topbar .btn.settings-btn.active { background: rgba(237, 230, 218, .24); border-color: var(--clay); }
 
 @media (max-width: 700px) {
   .topbar { flex-wrap: wrap; padding: 10px 16px 4px; row-gap: 6px; }
@@ -284,6 +305,16 @@ dialog::backdrop { background: rgba(23, 34, 41, .45); }
   opacity: 0; pointer-events: none; transition: .25s;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Innstillinger */
+.steps { margin: 0; padding-left: 20px; }
+.steps li { margin-bottom: 4px; }
+.seg { display: inline-flex; background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 2px; margin: 4px 0 6px; }
+.seg label { cursor: pointer; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg span { display: block; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: .92rem; color: var(--muted); }
+.seg input:checked + span { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(23, 34, 41, .15); }
+.seg input:focus-visible + span { box-shadow: var(--focus); }
 
 /* Bunnlinje med avsender */
 .site-foot {

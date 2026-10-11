@@ -11,7 +11,9 @@ En enkel nettside som hjelper trenere å planlegge aktivitetsdager i barneidrett
 - **Regler og råd** – kortversjon av idrettens barnerettigheter og bestemmelser om barneidrett (NIF), med lenke til originalen.
 - **PDF** – alt kan skrives ut eller lagres som PDF, hver side for seg eller alt samlet.
 
-Alt lagres i nettleseren du bruker. Ingen innlogging, ingen server. Med «Lagre til fil» kan du ta med dataene til en annen maskin eller dele dem med en annen trener.
+Alt lagres i nettleseren du bruker. Ingen innlogging, ingen server. Med «Lagre til fil» under Innstillinger (tannhjulet øverst) kan du ta med dataene til en annen maskin eller dele dem med en annen trener.
+
+Under Innstillinger ligger også brukermanualen (`docs/brukermanual.pdf`), valg av lys eller mørk visning og «Slett alt».
 
 ## Slik bruker du siden
 
@@ -43,4 +45,5 @@ Dobbeltklikk på `index.html`, så åpnes siden i nettleseren. Det trengs ingen 
 - `js/algorithms.js` – fordeling av lag, kamper, dommere og oppgaver
 - `js/print.js` – utskriftsversjonene (PDF)
 - `js/app.js` – knapper, skjemaer og tabeller
+- `docs/brukermanual.pdf` – brukermanual for trenere med skjermbilder (bare oppdiktede navn)
 - `assets/` – logo (`logo.svg`), appikon i 1024 × 1024 for App Store (`app-icon-1024.png`, uten gjennomsiktighet og avrundede hjørner) og ikoner for nettleser og hjemskjerm
