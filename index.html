@@ -7,15 +7,28 @@
   <meta name="description" content="Laginndeling, kampoppsett, oppgavefordeling og dommeroppsett for aktivitetsdager i barneidrett.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
   <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <meta name="theme-color" content="#2F4858">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
-  <link rel="stylesheet" href="css/style.css?v=2026-10-11h">
+  <link rel="stylesheet" href="css/style.css?v=2026-10-11j">
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M4 20h16"/></symbol>
+      <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/></symbol>
+      <symbol id="i-archive" viewBox="0 0 24 24"><path d="M3 4h18v4H3zM5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+      <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    </defs>
+  </svg>
   <header class="topbar">
     <div class="brand"><img class="logo" src="assets/logo.svg" alt="" width="34" height="34"> <span>Aktivitetsdag</span> <span class="sport-badge" id="sport-icon"></span></div>
     <nav class="tabs" role="tablist">
@@ -26,7 +39,10 @@
       <button class="tab" data-tab="dommer" role="tab">Dommere</button>
       <button class="tab" data-tab="regler" role="tab">Regler og råd</button>
     </nav>
-    <button class="btn primary" id="btn-export">📄 PDF</button>
+    <div class="top-actions">
+      <button class="btn" id="btn-export" title="Skriv ut eller velg hvilke sider som skal med"><svg class="i" aria-hidden="true"><use href="#i-print"/></svg> <span>Skriv ut</span></button>
+      <button class="btn primary" id="btn-pdf-download" title="Last ned alt om dagen som én PDF"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg> <span>Lagre som PDF</span></button>
+    </div>
   </header>
 
   <main id="app">
@@ -34,10 +50,19 @@
     <section class="page" id="page-dag">
       <div class="hero">
         <div class="hero-text">
+          <div class="eyebrow">Planlegging for barneidrett</div>
           <h1>Planlegg aktivitetsdagen på et blunk</h1>
           <p>Lag, kamper, foreldreoppgaver og dommere for barneidrett, klart til utskrift. Laget med <a href="#" data-goto="regler">idrettens barnerettigheter</a> i bakhodet: jevne lag, like mye spilletid og nye lagkamerater hver gang.</p>
         </div>
-        <div class="hero-icons" aria-hidden="true">⚽🏒🤾🏀🏐🥅</div>
+        <svg class="hero-art" viewBox="0 0 320 220" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round">
+            <rect x="10" y="10" width="300" height="200" rx="46"/>
+            <line x1="160" y1="10" x2="160" y2="210"/>
+            <circle cx="160" cy="110" r="40"/>
+            <path d="M10 70h34a20 20 0 0 1 20 20v40a20 20 0 0 1-20 20H10M310 70h-34a20 20 0 0 0-20 20v40a20 20 0 0 0 20 20h34"/>
+          </g>
+          <circle cx="226" cy="72" r="15" fill="#E3A587"/>
+        </svg>
       </div>
 
       <h2 class="section-title">Om aktivitetsdagen</h2>
@@ -60,8 +85,8 @@
         <h2>Ny aktivitetsdag og rullering</h2>
         <p class="muted">Når en aktivitetsdag er ferdig, lagrer du den i historikken. Neste gang du lager laginndeling, prøver siden å blande spillerne slik at de får nye lagkamerater, og foreldre som hadde oppgaver sist blir spart neste gang.</p>
         <div class="row">
-          <button class="btn" id="btn-archive">💾 Lagre dagen i historikken</button>
-          <button class="btn" id="btn-newday">➕ Start ny aktivitetsdag</button>
+          <button class="btn" id="btn-archive"><svg class="i" aria-hidden="true"><use href="#i-archive"/></svg> Lagre dagen i historikken</button>
+          <button class="btn" id="btn-newday"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg> Start ny aktivitetsdag</button>
         </div>
         <div id="history-list"></div>
       </div>
@@ -70,9 +95,10 @@
         <h2>Lagre og dele</h2>
         <p class="muted">Alt lagres automatisk i denne nettleseren. Vil du bruke det på en annen maskin, eller dele med en annen trener, lagrer du en fil og åpner den der.</p>
         <div class="row">
-          <button class="btn" id="btn-save-file">⬇️ Lagre til fil</button>
-          <label class="btn">⬆️ Åpne fil<input type="file" id="file-open" accept=".json,application/json" hidden></label>
-          <button class="btn danger" id="btn-reset">🗑️ Slett alt</button>
+          <button class="btn" id="btn-save-file"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg> Lagre til fil</button>
+          <button class="btn" data-pdf-download><svg class="i" aria-hidden="true"><use href="#i-file"/></svg> Lagre som PDF</button>
+          <label class="btn"><svg class="i" aria-hidden="true"><use href="#i-upload"/></svg> Åpne fil<input type="file" id="file-open" accept=".json,application/json" hidden></label>
+          <button class="btn danger" id="btn-reset"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg> Slett alt</button>
         </div>
       </div>
     </section>
@@ -81,7 +107,7 @@
     <section class="page" id="page-lag">
       <div class="page-head">
         <h1>Laginndeling</h1>
-        <button class="btn" data-print="lag">📄 PDF av laginndeling</button>
+        <button class="btn" data-print="lag"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg> PDF av laginndeling</button>
       </div>
 
       <div class="cols">
@@ -122,7 +148,7 @@
             <tbody></tbody>
           </table>
           <div class="row">
-            <button class="btn primary" id="btn-make-teams">🎲 Lag laginndeling</button>
+            <button class="btn primary" id="btn-make-teams"><svg class="i" aria-hidden="true"><use href="#i-shuffle"/></svg> Lag laginndeling</button>
           </div>
         </div>
       </div>
@@ -139,7 +165,7 @@
     <section class="page" id="page-kamp">
       <div class="page-head">
         <h1>Kampoppsett</h1>
-        <button class="btn" data-print="kamp">📄 PDF av kampoppsett</button>
+        <button class="btn" data-print="kamp"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg> PDF av kampoppsett</button>
       </div>
 
       <div class="cols">
@@ -151,7 +177,7 @@
             <thead><tr><th>Lagnavn</th><th>Klubb</th><th>Klasse</th><th></th></tr></thead>
             <tbody></tbody>
           </table>
-          <div class="row"><button class="btn" id="btn-add-guest">➕ Legg til lag</button></div>
+          <div class="row"><button class="btn" id="btn-add-guest"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg> Legg til lag</button></div>
         </div>
 
         <div class="card">
@@ -160,7 +186,7 @@
             <thead><tr><th>Bane</th><th>Klasse</th><th></th></tr></thead>
             <tbody></tbody>
           </table>
-          <div class="row"><button class="btn" id="btn-add-bane">➕ Legg til bane</button></div>
+          <div class="row"><button class="btn" id="btn-add-bane"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg> Legg til bane</button></div>
 
           <h2>Tidspunkter</h2>
           <div class="grid2">
@@ -181,7 +207,7 @@
             <label>Avslutning (tekst)<input data-bind="schedule.timing.endLabel" placeholder="Premieutdeling og rydding"></label>
             <label>Avslutning (min)<input type="number" min="0" data-bind="schedule.timing.endMin" data-type="number"></label>
           </div>
-          <div class="row"><button class="btn" id="btn-gen-times">⏱️ Lag tidspunkter</button></div>
+          <div class="row"><button class="btn" id="btn-gen-times"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg> Lag tidspunkter</button></div>
           <p class="muted">En <b>kamprunde</b> er ett tidspunkt der alle banene spiller samtidig. Du kan også endre hvert tidspunkt direkte i tabellen under, og legge inn pauser (f.eks. vanning) der du vil.</p>
 
           <h2>Regler</h2>
@@ -190,14 +216,14 @@
           <label class="check"><input type="checkbox" data-bind="schedule.avoidThreeInRow"> Unngå at et lag spiller tre kamper på rad</label>
           <label class="check"><input type="checkbox" data-bind="schedule.equalGames"> Alle lag skal spille like mange kamper</label>
           <p class="muted">Går ikke regnestykket opp, står noen baner tomme i enkelte runder. Uten dette valget kan noen lag få én kamp mer enn andre.</p>
-          <div class="row"><button class="btn primary" id="btn-make-schedule">🎲 Lag kampoppsett</button></div>
+          <div class="row"><button class="btn primary" id="btn-make-schedule"><svg class="i" aria-hidden="true"><use href="#i-shuffle"/></svg> Lag kampoppsett</button></div>
         </div>
       </div>
 
       <div class="card">
         <h2>Oppsett</h2>
         <div class="table-wrap"><table class="grid" id="schedule-table"></table></div>
-        <div class="row"><button class="btn" id="btn-add-slot">➕ Legg til kamprunde</button> <button class="btn" id="btn-add-break">➕ Legg til pause</button></div>
+        <div class="row"><button class="btn" id="btn-add-slot"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg> Legg til kamprunde</button> <button class="btn" id="btn-add-break"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg> Legg til pause</button></div>
         <h2>Antall kamper per lag</h2>
         <div id="match-count"></div>
       </div>
@@ -207,7 +233,7 @@
     <section class="page" id="page-oppgaver">
       <div class="page-head">
         <h1>Oppgavefordeling for foreldre</h1>
-        <button class="btn" data-print="oppgaver">📄 PDF av oppgaver</button>
+        <button class="btn" data-print="oppgaver"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg> PDF av oppgaver</button>
       </div>
       <div class="card">
         <p class="muted">Hver spiller regnes som én familie. Skriv gjerne navn på foresatte under Laginndeling, så kommer de med her. Familier som har hatt flest oppgaver tidligere (i historikken) blir spart først.</p>
@@ -218,8 +244,8 @@
           </table>
         </div>
         <div class="row">
-          <button class="btn" id="btn-add-task">➕ Legg til oppgave</button>
-          <button class="btn primary" id="btn-fill-tasks">🎲 Fordel oppgaver</button>
+          <button class="btn" id="btn-add-task"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg> Legg til oppgave</button>
+          <button class="btn primary" id="btn-fill-tasks"><svg class="i" aria-hidden="true"><use href="#i-shuffle"/></svg> Fordel oppgaver</button>
           <button class="btn" id="btn-clear-tasks">Tøm fordeling</button>
         </div>
         <p class="muted" id="task-info"></p>
@@ -230,7 +256,7 @@
     <section class="page" id="page-dommer">
       <div class="page-head">
         <h1>Dommeroppsett</h1>
-        <button class="btn" data-print="dommer">📄 PDF av dommeroppsett</button>
+        <button class="btn" data-print="dommer"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg> PDF av dommeroppsett</button>
       </div>
       <div class="cols">
         <div class="card">
@@ -250,7 +276,7 @@
           </div>
           <label class="check"><input type="checkbox" data-bind="refs.sameBane"> Dommerne holder seg på samme bane hele dagen</label>
           <p class="muted">Dommerne fordeles så likt som mulig, og ingen dommer settes opp på to baner samtidig. Med fast bane fordeles dommerne på banene etter tur i lista. Er det flere dommere enn det trengs på en bane, bytter de på der.</p>
-          <div class="row"><button class="btn primary" id="btn-make-refs">🎲 Lag dommeroppsett</button></div>
+          <div class="row"><button class="btn primary" id="btn-make-refs"><svg class="i" aria-hidden="true"><use href="#i-shuffle"/></svg> Lag dommeroppsett</button></div>
         </div>
       </div>
       <div class="card">
@@ -268,14 +294,14 @@
       <div class="card">
         <h2>Idrettens barnerettigheter</h2>
         <div class="rights">
-          <div class="right"><span>🛡️</span><div><b>Trygghet</b><p>Barn skal ha et trygt miljø, uten press og utnyttelse. Barn under 6 år skal ha med seg en voksen.</p></div></div>
-          <div class="right"><span>🤝</span><div><b>Vennskap og trivsel</b><p>Aktiviteten skal gi vennskap og samhold.</p></div></div>
-          <div class="right"><span>🌟</span><div><b>Mestring</b><p>Barn skal oppleve mestring og lære mange ferdigheter, gjennom variasjon, øving og lek med andre.</p></div></div>
-          <div class="right"><span>💬</span><div><b>Medbestemmelse</b><p>Barn skal få si sin mening og bli hørt når aktiviteten planlegges og gjennomføres.</p></div></div>
-          <div class="right"><span>🧭</span><div><b>Frihet til å velge</b><p>Barn velger selv hvilke og hvor mange idretter de vil drive med, og hvor mye de vil trene.</p></div></div>
-          <div class="right"><span>🏅</span><div><b>Konkurranser for alle</b><p>Barn velger selv om de vil delta i konkurranser.</p></div></div>
-          <div class="right"><span>🧒</span><div><b>På barnas premisser</b><p>Aktiviteten skal tilpasses barnas alder, utvikling og modenhet.</p></div></div>
-          <div class="right"><span>💛</span><div><b>Alle kan være med</b><p>Det skal ikke være avgjørende for barnas deltakelse hva foreldrene har råd til eller hvor mye de engasjerer seg.</p></div></div>
+          <div class="right"><span class="right-no">1</span><div><b>Trygghet</b><p>Barn skal ha et trygt miljø, uten press og utnyttelse. Barn under 6 år skal ha med seg en voksen.</p></div></div>
+          <div class="right"><span class="right-no">2</span><div><b>Vennskap og trivsel</b><p>Aktiviteten skal gi vennskap og samhold.</p></div></div>
+          <div class="right"><span class="right-no">3</span><div><b>Mestring</b><p>Barn skal oppleve mestring og lære mange ferdigheter, gjennom variasjon, øving og lek med andre.</p></div></div>
+          <div class="right"><span class="right-no">4</span><div><b>Medbestemmelse</b><p>Barn skal få si sin mening og bli hørt når aktiviteten planlegges og gjennomføres.</p></div></div>
+          <div class="right"><span class="right-no">5</span><div><b>Frihet til å velge</b><p>Barn velger selv hvilke og hvor mange idretter de vil drive med, og hvor mye de vil trene.</p></div></div>
+          <div class="right"><span class="right-no">6</span><div><b>Konkurranser for alle</b><p>Barn velger selv om de vil delta i konkurranser.</p></div></div>
+          <div class="right"><span class="right-no">7</span><div><b>På barnas premisser</b><p>Aktiviteten skal tilpasses barnas alder, utvikling og modenhet.</p></div></div>
+          <div class="right"><span class="right-no">8</span><div><b>Alle kan være med</b><p>Det skal ikke være avgjørende for barnas deltakelse hva foreldrene har råd til eller hvor mye de engasjerer seg.</p></div></div>
         </div>
       </div>
 
@@ -320,25 +346,25 @@
   <!-- Eksport-dialog -->
   <dialog id="export-dialog">
     <form method="dialog">
-      <h2>Lag PDF</h2>
-      <p class="muted">Velg hva som skal være med. Trykk så «Lag PDF», og velg <b>Lagre som PDF</b> i utskriftsvinduet.</p>
+      <h2>Skriv ut</h2>
+      <p class="muted">Velg hva som skal være med, og trykk «Skriv ut». I utskriftsvinduet kan du også velge <b>Lagre som PDF</b>. Vil du bare laste ned alt som én PDF, bruker du knappen «Lagre som PDF» i stedet.</p>
       <label class="check"><input type="checkbox" name="lag" checked> Laginndeling</label>
       <label class="check"><input type="checkbox" name="kamp" checked> Kampoppsett</label>
       <label class="check"><input type="checkbox" name="oppgaver" checked> Oppgavefordeling</label>
       <label class="check"><input type="checkbox" name="dommer" checked> Dommeroppsett</label>
       <div class="row end">
         <button class="btn" value="cancel">Avbryt</button>
-        <button class="btn primary" value="ok">Lag PDF</button>
+        <button class="btn primary" value="ok">Skriv ut</button>
       </div>
     </form>
   </dialog>
 
-  <div id="print-area"></div>
+  <div id="print-area" class="p-doc"></div>
   <div id="toast" role="status"></div>
 
-  <script src="js/state.js?v=2026-10-11h"></script>
-  <script src="js/algorithms.js?v=2026-10-11h"></script>
-  <script src="js/print.js?v=2026-10-11h"></script>
-  <script src="js/app.js?v=2026-10-11h"></script>
+  <script src="js/state.js?v=2026-10-11j"></script>
+  <script src="js/algorithms.js?v=2026-10-11j"></script>
+  <script src="js/print.js?v=2026-10-11j"></script>
+  <script src="js/app.js?v=2026-10-11j"></script>
 </body>
 </html>

@@ -743,6 +743,18 @@
         return;
       }
 
+      const dl = e.target.closest('#btn-pdf-download, [data-pdf-download]');
+      if (dl) {
+        if (dl.disabled) return;
+        dl.disabled = true;
+        toast('Lager PDF …');
+        Print.download(['lag', 'kamp', 'oppgaver', 'dommer'])
+          .then(() => toast(`PDF-en er lagret som «${Print.fileName()}» i Nedlastinger.`))
+          .catch(() => toast('Klarte ikke å lage PDF-en. Prøv «Skriv ut» og velg «Lagre som PDF» der.'))
+          .finally(() => { dl.disabled = false; });
+        return;
+      }
+
       const pr = e.target.closest('[data-print]');
       if (pr) { Print.print([pr.dataset.print]); return; }
 

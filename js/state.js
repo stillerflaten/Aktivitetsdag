@@ -2,7 +2,7 @@
 (function () {
   const KEY = 'aktivitetsdag.v1';
 
-  const COLORS = ['#ef5350', '#42a5f5', '#ffd54f', '#66bb6a', '#ffa726', '#ab47bc', '#26c6da', '#f06292', '#8d6e63', '#78909c'];
+  const COLORS = ['#C9785A', '#5B8BA0', '#D8B45C', '#6F9A78', '#2F4858', '#9A7BA6', '#4F9A94', '#C98A9A', '#8C7B6B', '#7D8C96'];
   const TEAM_NAMES = ['Ørn', 'Ulv', 'Bjørn', 'Rev', 'Gaupe', 'Elg', 'Ugle', 'Oter', 'Hare', 'Ekorn'];
   const SPORTS = [
     ['Fotball', '⚽'], ['Håndball', '🤾'], ['Ishockey', '🏒'], ['Bandy', '🏑'], ['Innebandy', '🏑'],
