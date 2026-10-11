@@ -137,9 +137,11 @@
     for (let attempt = 0; attempt < 400; attempt++) {
       const games = Object.fromEntries(ids.map((id) => [id, 0]));
       const last = {};
+      const streak = {}; // antall kamper på rad laget har spilt
       const pairs = new Map();
       const result = {};
       let backToBack = 0;
+      let threeInRow = 0;
       let sameClub = 0;
       let repeats = 0;
 
@@ -148,7 +150,10 @@
         result[slotId] = {};
         for (let bi = 0; bi < nB; bi++) {
           const avail = ids.filter((id) => !used.has(id));
-          const rest = (id) => (opts.avoidBackToBack && last[id] === si - 1 ? 5 : 0);
+          const rest = (id) => {
+            if (last[id] !== si - 1) return 0;
+            return (opts.avoidBackToBack ? 5 : 0) + (opts.avoidThreeInRow && streak[id] >= 2 ? 25 : 0);
+          };
           const a = argmin(avail, (id) => games[id] * 10 + rest(id) + Math.random() * 3);
           const b = argmin(avail.filter((id) => id !== a), (id) =>
             games[id] * 10 + rest(id) +
@@ -159,6 +164,8 @@
           used.add(a); used.add(b);
           for (const id of [a, b]) {
             if (last[id] === si - 1) backToBack++;
+            streak[id] = last[id] === si - 1 ? streak[id] + 1 : 1;
+            if (streak[id] >= 3) threeInRow++;
             last[id] = si;
             games[id]++;
           }
@@ -173,7 +180,8 @@
 
       const g = Object.values(games);
       const score = (Math.max(...g) - Math.min(...g)) * 100 + repeats * 12 +
-        (opts.avoidBackToBack ? backToBack * 6 : 0) + (opts.avoidSameClub ? sameClub * 8 : 0);
+        (opts.avoidBackToBack ? backToBack * 6 : 0) + (opts.avoidThreeInRow ? threeInRow * 40 : 0) +
+        (opts.avoidSameClub ? sameClub * 8 : 0);
       if (score < bestScore) { bestScore = score; best = result; }
     }
     // Varier banene: roter rekkefølgen per runde slik at lag ikke alltid står på samme bane.

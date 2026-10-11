@@ -54,7 +54,8 @@
         slots: [], // { id, from, to, type: 'match'|'break', label }
         matches: {}, // slotId -> baneId -> [lagA, lagB]
         avoidSameClub: true,
-        avoidBackToBack: true
+        avoidBackToBack: true,
+        avoidThreeInRow: true
       },
       tasks: defaultTasks(),
       refs: {
