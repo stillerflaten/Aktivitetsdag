@@ -70,9 +70,24 @@
 
   function oppgaver() {
     const fam = App.familyMap();
-    const rows = S.tasks.map((t) => `<tr><td>${esc(t.name)}</td><td>${esc(t.time)}</td><td>${t.assigned.map((id) => esc(fam[id] || '')).filter(Boolean).join('<br>')}</td></tr>`).join('');
-    return `<section class="p-page">${heading('', 'OPPGAVEFORDELING')}
-      <table class="p-table p-tasks"><thead><tr><th>Oppgave</th><th>Tidspunkt</th><th>Ansvarlige</th></tr></thead><tbody>${rows}</tbody></table></section>`;
+    let missingTotal = 0;
+    const rows = S.tasks.map((t) => {
+      const names = t.assigned.slice(0, t.needed).map((id) => fam[id] || '').filter(Boolean);
+      const missing = Math.max(0, (t.needed || 0) - names.length);
+      missingTotal += missing;
+      // Tomme linjer for hver plass som mangler, så man kan skrive inn navn for hånd.
+      const blanks = Array.from({ length: missing }, () => '<div class="p-blank"></div>').join('');
+      const status = missing
+        ? `<span class="p-missing">Mangler ${missing}</span>`
+        : '<span class="p-full">Fullt</span>';
+      return `<tr><td>${esc(t.name)}</td><td>${esc(t.time)}</td><td>${names.map(esc).join('<br>')}${blanks}</td>`
+        + `<td class="p-staff">${names.length} av ${t.needed || 0}<br>${status}</td></tr>`;
+    }).join('');
+    const summary = missingTotal
+      ? `<p class="p-summary">Det mangler <b>${missingTotal}</b> ${missingTotal === 1 ? 'person' : 'personer'} totalt. Skriv navn på de tomme linjene.</p>`
+      : '<p class="p-summary">Alle oppgaver er fullt bemannet.</p>';
+    return `<section class="p-page">${heading('', 'OPPGAVEFORDELING')}${summary}
+      <table class="p-table p-tasks"><thead><tr><th>Oppgave</th><th>Tidspunkt</th><th>Ansvarlige</th><th>Bemanning</th></tr></thead><tbody>${rows}</tbody></table></section>`;
   }
 
   function dommer() {
