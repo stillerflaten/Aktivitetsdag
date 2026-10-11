@@ -152,23 +152,30 @@
   async function download(sections) {
     await loadLib();
     const fmt = { unit: 'mm', format: 'a4', orientation: 'landscape' };
-    const opt = { margin: [14, 10, 14, 10], jsPDF: fmt, html2canvas: { scale: 2, backgroundColor: '#ffffff' } };
+    const opt = { margin: [14, 10, 14, 10], jsPDF: fmt, html2canvas: { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 } };
     const canvases = [];
-    for (const s of sections) {
-      const el = document.createElement('div');
-      el.className = 'p-doc p-download';
-      el.innerHTML = builders[s]();
-      // Mål hvor hver tabellrad slutter, så lange deler kan deles mellom rader og ikke midt i dem.
-      el.style.cssText = 'position:absolute;left:-20000px;top:0;width:1047px';
-      document.body.appendChild(el);
-      const y0 = el.getBoundingClientRect().top;
-      const cuts = [...el.querySelectorAll('tr, .p-head, .p-team')].map((r) => r.getBoundingClientRect().bottom - y0);
-      el.remove();
-      el.style.cssText = '';
-      // Bredden settes av html2pdf ut fra sidestørrelse og marger (277 mm), så skriften blir som ved utskrift.
-      const cv = await window.html2pdf().set(opt).from(el).toCanvas().get('canvas');
-      cv.cuts = cuts;
-      canvases.push(cv);
+    // html2canvas (særlig i Safari) tegner feil utsnitt hvis siden er rullet ned. Rull til toppen mens vi tegner.
+    const sx = window.scrollX, sy = window.scrollY;
+    window.scrollTo(0, 0);
+    try {
+      for (const s of sections) {
+        const el = document.createElement('div');
+        el.className = 'p-doc p-download';
+        el.innerHTML = builders[s]();
+        // Mål hvor hver tabellrad slutter, så lange deler kan deles mellom rader og ikke midt i dem.
+        el.style.cssText = 'position:absolute;left:-20000px;top:0;width:1047px';
+        document.body.appendChild(el);
+        const y0 = el.getBoundingClientRect().top;
+        const cuts = [...el.querySelectorAll('tr, .p-head, .p-team')].map((r) => r.getBoundingClientRect().bottom - y0);
+        el.remove();
+        el.style.cssText = '';
+        // Bredden settes av html2pdf ut fra sidestørrelse og marger (277 mm), så skriften blir som ved utskrift.
+        const cv = await window.html2pdf().set(opt).from(el).toCanvas().get('canvas');
+        cv.cuts = cuts;
+        canvases.push(cv);
+      }
+    } finally {
+      window.scrollTo(sx, sy);
     }
     // jsPDF ligger inne i html2pdf-pakken; vi starter fra et tomt dokument og fyller første side selv.
     const pdf = await window.html2pdf().set(opt).from('<div></div>', 'string').toPdf().get('pdf');
