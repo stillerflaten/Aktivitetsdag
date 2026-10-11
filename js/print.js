@@ -165,7 +165,7 @@
       for (let i = 1; i <= n; i++) {
         pdf.setPage(i);
         pdf.setFontSize(8.5);
-        pdf.setTextColor(90);
+        pdf.setTextColor(95, 107, 114);
         pdf.text(text, w / 2, 8, { align: 'center' });
         pdf.text(text, w / 2, h - 6, { align: 'center' });
       }
