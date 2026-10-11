@@ -79,6 +79,7 @@ h3 { font-size: .98rem; font-weight: 700; margin: 14px 0 6px; }
 .muted { color: var(--muted); font-size: .9rem; }
 .info { background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 8px; padding: 9px 12px; font-weight: 600; margin: 10px 0; }
 .info:empty { display: none; }
+.info.warn { background: var(--conflict); border-left-color: var(--danger); }
 small { font-weight: normal; opacity: .8; }
 a { color: var(--highlight); text-underline-offset: 2px; }
 

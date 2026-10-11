@@ -14,7 +14,7 @@
   <meta name="theme-color" content="#2F4858">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
   <script>try { var t = localStorage.getItem('aktivitetsdag.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
-  <link rel="stylesheet" href="css/style.css?v=2026-10-11s">
+  <link rel="stylesheet" href="css/style.css?v=2026-10-11t">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -218,6 +218,7 @@
 
       <div class="card">
         <h2>Oppsett</h2>
+        <p class="info warn" id="schedule-warn" role="status"></p>
         <div class="table-wrap"><table class="grid" id="schedule-table"></table></div>
         <div class="row"><button class="btn" id="btn-add-slot"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg> Legg til kamprunde</button> <button class="btn" id="btn-add-break"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg> Legg til pause</button></div>
         <h2>Antall kamper per lag</h2>
@@ -431,9 +432,9 @@
   <div id="print-area" class="p-doc"></div>
   <div id="toast" role="status"></div>
 
-  <script src="js/state.js?v=2026-10-11s"></script>
-  <script src="js/algorithms.js?v=2026-10-11s"></script>
-  <script src="js/print.js?v=2026-10-11s"></script>
-  <script src="js/app.js?v=2026-10-11s"></script>
+  <script src="js/state.js?v=2026-10-11t"></script>
+  <script src="js/algorithms.js?v=2026-10-11t"></script>
+  <script src="js/print.js?v=2026-10-11t"></script>
+  <script src="js/app.js?v=2026-10-11t"></script>
 </body>
 </html>
