@@ -1,18 +1,19 @@
-# Aktivitetsdag 🏒
+# Aktivitetsdag ⭐
 
-En enkel nettside som hjelper ishockeytrenere å planlegge aktivitetsdager i barneishockey:
+En enkel nettside som hjelper trenere å planlegge aktivitetsdager i barneidrett, enten det er ishockey, fotball, håndball eller noe annet:
 
 - **Laginndeling** – velg antall spillere per lag (eller antall lag). Siden blander spillerne slik at de får nye lagkamerater fra gang til gang.
 - **Kampoppsett** – legg inn lagene som kommer på besøk, baner og tidspunkter. Siden lager et oppsett der alle lag får like mange kamper, helst mot andre klubber og uten to kamper på rad.
 - **Oppgaver** – fordeler oppgaver (kiosk, opprigg, kakebaking …) mellom foreldrene, og sparer de som hadde oppgaver sist.
 - **Dommere** – fordeler dommere på kampene så likt som mulig.
+- **Regler og råd** – kortversjon av idrettens barnerettigheter og bestemmelser om barneidrett (NIF), med lenke til originalen.
 - **PDF** – alt kan skrives ut eller lagres som PDF, hver side for seg eller alt samlet.
 
 Alt lagres i nettleseren du bruker. Ingen innlogging, ingen server. Med «Lagre til fil» kan du ta med dataene til en annen maskin eller dele dem med en annen trener.
 
 ## Slik bruker du siden
 
-1. **Dagen**: Fyll inn tittel, dato, ishall, klubb og årsklasse.
+1. **Dagen**: Fyll inn tittel, idrett, dato, sted, klubb og årsklasse.
 2. **Laginndeling**: Lim inn spillerlisten, velg antall per lag og trykk «Lag laginndeling». Flytt spillere manuelt hvis du vil.
 3. **Kampoppsett**: Legg til besøkende lag, sett opp baner og tider, og trykk «Lag kampoppsett». Du kan endre hver kamp i tabellen etterpå.
 4. **Oppgaver** og **Dommere**: Trykk på knappene for å fordele automatisk, og juster etter behov.
