@@ -79,6 +79,7 @@ h3 { font-size: .98rem; font-weight: 700; margin: 14px 0 6px; }
 .muted { color: var(--muted); font-size: .9rem; }
 .info { background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 8px; padding: 9px 12px; font-weight: 600; margin: 10px 0; }
 .info:empty { display: none; }
+.info.warn { background: var(--conflict); border-left-color: var(--danger); }
 small { font-weight: normal; opacity: .8; }
 a { color: var(--highlight); text-underline-offset: 2px; }
 
@@ -326,6 +327,12 @@ dialog::backdrop { background: rgba(23, 34, 41, .45); }
 .site-foot .maker img { border-radius: 5px; display: block; }
 .site-foot b { font-weight: 700; }
 .site-foot .btn { padding: 6px 14px; font-size: .85rem; }
+.site-foot .foot-right { display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.app-ad { display: inline-flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
+.app-ad:hover span { text-decoration: underline; }
+.app-ad img, .app-card img { border-radius: 22%; display: block; flex: none; }
+.app-card { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; color: inherit; text-decoration: none; font-size: .9rem; }
+.app-card:hover { border-color: var(--accent); }
 
 /* ---------- Utskrift / PDF ---------- */
 #print-area { display: none; }

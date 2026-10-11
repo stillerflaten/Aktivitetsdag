@@ -328,6 +328,47 @@
       : '<p class="muted">Ingen lag ennå.</p>';
   }
 
+  // Sjekker et ferdig oppsett mot reglene som er valgt. Oppsettet kan være laget før en regel ble
+  // slått på, eller endret for hånd, og da skal det synes.
+  function scheduleProblems() {
+    const slots = matchSlots();
+    const tm = teamMap();
+    const out = [];
+    if (S.schedule.avoidThreeInRow) {
+      const tired = [];
+      for (const [id, t] of Object.entries(tm)) {
+        let streak = 0, max = 0;
+        for (const s of slots) {
+          const plays = Object.values(S.schedule.matches[s.id] || {}).some((m) => (m || []).includes(id));
+          streak = plays ? streak + 1 : 0;
+          max = Math.max(max, streak);
+        }
+        if (max >= 3) tired.push(t.label);
+      }
+      if (tired.length) out.push(`${listNames(tired)} spiller tre kamper på rad`);
+    }
+    if (S.schedule.equalGames) {
+      const c = matchCounts();
+      const uneven = Algo.puljer(Object.values(tm), S.schedule.banes).some((p) => {
+        const g = p.teams.map((t) => c[t.id] || 0);
+        return g.length > 1 && Math.max(...g) !== Math.min(...g);
+      });
+      if (uneven && Object.keys(c).length) out.push('ikke alle lag spiller like mange kamper');
+    }
+    return out;
+  }
+
+  function listNames(a) {
+    return a.length > 1 ? a.slice(0, -1).join(', ') + ' og ' + a[a.length - 1] : a[0];
+  }
+
+  function renderScheduleWarn() {
+    const p = scheduleProblems();
+    $('#schedule-warn').textContent = p.length
+      ? `Dette oppsettet følger ikke reglene: ${p.join(', og ')}. Trykk «Lag kampoppsett» på nytt.`
+      : '';
+  }
+
   function renderTasks() {
     const fam = familyMap();
     const famOpts = Object.entries(fam).map(([id, label]) => ({ id, label }));
@@ -406,6 +447,7 @@
     ['#guest-table', renderGuests],
     ['#bane-table', renderBanes],
     ['#schedule-table', renderSchedule],
+    ['#schedule-warn', renderScheduleWarn],
     ['#task-table', renderTasks],
     ['#ref-table', renderRefs]
   ];
