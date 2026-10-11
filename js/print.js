@@ -116,7 +116,7 @@
     const text = esc(runningText());
     // Topptekst i <thead> gjentas øverst på hver utskrevne side. Bunnteksten står fast nederst,
     // og en tom <tfoot> holder av plass til den så innholdet ikke havner oppå.
-    area.innerHTML = `<div class="p-runfoot"><span>${text}</span><span class="p-maker"><img src="assets/tillerflaten-design.svg" alt="" width="12" height="12"> Laget av Tillerflaten Design · post@tillerflatendesign.no</span></div>` + sections.map((s) => builders[s]()
+    area.innerHTML = `<div class="p-runfoot"><span>${text}</span><span class="p-maker"><img src="assets/tillerflaten-digital.svg" alt="" width="12" height="12"> Laget av Tillerflaten Digital · post@tillerflatendigital.no</span></div>` + sections.map((s) => builders[s]()
       .replace('<section class="p-page">', `<section class="p-page"><table class="p-wrap"><thead><tr><td><div class="p-runhead">${text}</div></td></tr></thead><tbody><tr><td>`)
       .replace(/<\/section>$/, '</td></tr></tbody><tfoot><tr><td><div class="p-footspace"></div></td></tr></tfoot></table></section>')).join('');
     // Gi nettleseren et øyeblikk til å tegne før utskriftsvinduet åpnes.
@@ -151,9 +151,9 @@
     return [slug(e.title) || 'aktivitetsdag', slug(e.club), e.date, part].filter(Boolean).join('-') + '.pdf';
   }
 
-  // Diskret avsender nederst på hver PDF-side: Tillerflaten Design-logoen og navnet, med lenke til e-post.
+  // Diskret avsender nederst på hver PDF-side: Tillerflaten Digital-logoen og navnet, med lenke til e-post.
   function maker(pdf, cx, y) {
-    const label = 'Laget av Tillerflaten Design';
+    const label = 'Laget av Tillerflaten Digital';
     pdf.setFontSize(7);
     pdf.setTextColor(95, 107, 114);
     const tw = pdf.getTextWidth(label);
@@ -164,7 +164,7 @@
     pdf.roundedRect(x, y - s + 0.6, s, s, 7 * k, 7 * k, 'F');
     pdf.setFillColor(140, 198, 206);
     pdf.lines([[8.5 * k, -15 * k], [4.5 * k, 7.5 * k], [4 * k, -5.5 * k], [7 * k, 13 * k]], x + 4 * k, y - s + 0.6 + 25 * k, [1, 1], 'F', true);
-    pdf.textWithLink(label, x + s + 1.2, y, { url: 'mailto:post@tillerflatendesign.no' });
+    pdf.textWithLink(label, x + s + 1.2, y, { url: 'mailto:post@tillerflatendigital.no' });
   }
 
   // Hver del (laginndeling, kampoppsett …) tegnes for seg og legges på egne sider.
