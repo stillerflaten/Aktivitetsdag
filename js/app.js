@@ -747,9 +747,13 @@
       if (dl) {
         if (dl.disabled) return;
         dl.disabled = true;
+        // Knappen øverst lagrer siden man står på. Fra «Dagen» (og «Regler og råd») lagres alle sidene i én PDF.
+        const all = ['lag', 'kamp', 'oppgaver', 'dommer'];
+        const tab = (document.querySelector('.tab.active') || {}).dataset;
+        const sections = dl.id === 'btn-pdf-download' && tab && all.includes(tab.tab) ? [tab.tab] : all;
         toast('Lager PDF …');
-        Print.download(['lag', 'kamp', 'oppgaver', 'dommer'])
-          .then(() => toast(`PDF-en er lagret som «${Print.fileName()}» i Nedlastinger.`))
+        Print.download(sections)
+          .then(() => toast(`PDF-en er lagret som «${Print.fileName(sections)}» i Nedlastinger.`))
           .catch(() => toast('Klarte ikke å lage PDF-en. Prøv «Skriv ut» og velg «Lagre som PDF» der.'))
           .finally(() => { dl.disabled = false; });
         return;
