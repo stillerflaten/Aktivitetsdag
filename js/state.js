@@ -63,6 +63,7 @@
         people: [], // { id, name }
         perMatch: 1,
         block: 2,
+        sameBane: true,
         assignment: {} // slotId -> baneId -> [dommerId]
       },
       history: [] // { id, date, title, groups: [[spillerId]], taskFamilies: [spillerId] }
