@@ -126,12 +126,16 @@
     return [e.title || 'Aktivitetsdag', e.club].filter((x) => x && x.trim()).join(' - ');
   }
 
+  // Bunnteksten reklamerer for siden, så de som får arket vet hvor de finner den.
+  const SITE = 'aktivitetsdag.org';
+  const SITE_TEXT = 'Lag din egen aktivitetsdag på ';
+
   function print(sections) {
     const area = document.getElementById('print-area');
     const text = esc(runningText());
     // Topptekst i <thead> gjentas øverst på hver utskrevne side. Bunnteksten står fast nederst,
     // og en tom <tfoot> holder av plass til den så innholdet ikke havner oppå.
-    area.innerHTML = `<div class="p-runfoot"><span>${text}</span><span class="p-maker"><img src="assets/tillerflaten-digital.svg" alt="" width="12" height="12"> Laget av Tillerflaten Digital · post@tillerflatendigital.no</span></div>` + sections.map((s) => builders[s]()
+    area.innerHTML = `<div class="p-runfoot"><span>${SITE_TEXT}<a href="https://${SITE}">${SITE}</a></span><span class="p-maker"><img src="assets/tillerflaten-digital.svg" alt="" width="12" height="12"> Laget av Tillerflaten Digital · post@tillerflatendigital.no</span></div>` + sections.map((s) => builders[s]()
       .replace('<section class="p-page">', `<section class="p-page"><table class="p-wrap"><thead><tr><td><div class="p-runhead">${text}</div></td></tr></thead><tbody><tr><td>`)
       .replace(/<\/section>$/, '</td></tr></tbody><tfoot><tr><td><div class="p-footspace"></div></td></tr></tfoot></table></section>')).join('');
     // Gi nettleseren et øyeblikk til å tegne før utskriftsvinduet åpnes.
@@ -261,7 +265,11 @@
       pdf.setFontSize(8);
       pdf.setTextColor(47, 72, 88);
       pdf.text(text, mx, 7.5);
-      pdf.text(text, mx, H - 5.5);
+      pdf.text(SITE_TEXT, mx, H - 5.5);
+      const siteX = mx + pdf.getTextWidth(SITE_TEXT); // måles før fonten blir fet
+      pdf.setFont(undefined, 'bold');
+      pdf.textWithLink(SITE, siteX, H - 5.5, { url: 'https://' + SITE });
+      pdf.setFont(undefined, 'normal');
       pdf.setTextColor(184, 104, 74);
       pdf.text(`Side ${i} av ${n}`, W - mx, H - 5.5, { align: 'right' });
       maker(pdf, W / 2, H - 5.5);
