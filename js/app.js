@@ -381,13 +381,16 @@
     const all = familyMap();
     const fam = taskFamilyMap();
     const famOpts = Object.entries(fam).map(([id, label]) => ({ id, label }));
+    const taken = new Set(S.tasksHideAssigned ? S.tasks.flatMap((t) => t.assigned.slice(0, t.needed).filter(Boolean)) : []);
     $('#task-table tbody').innerHTML = S.tasks.map((t, i) => {
       const sels = [];
       for (let j = 0; j < (t.needed || 0); j++) {
         const id = t.assigned[j] || '';
+        // Den som står valgt i feltet, vises alltid der selv om familien er skjult i de andre listene.
+        const free = famOpts.filter((o) => o.id === id || !taken.has(o.id));
         // En familie som allerede er valgt, men ikke er med i dag, vises markert i stedet for å forsvinne.
         const out = id && !fam[id] && all[id];
-        const opts = out ? famOpts.concat({ id, label: `${all[id]} – ikke med i dag` }) : famOpts;
+        const opts = out ? free.concat({ id, label: `${all[id]} – ikke med i dag` }) : free;
         sels.push(`<select data-path="tasks.${i}.assigned.${j}"${out ? ' class="conflict"' : ''}>${options(opts, id, '–')}</select>`);
       }
       return `<tr>
