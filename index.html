@@ -14,7 +14,7 @@
   <meta name="theme-color" content="#2F4858">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
   <script>try { var t = localStorage.getItem('aktivitetsdag.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
-  <link rel="stylesheet" href="css/style.css?v=2026-10-12a">
+  <link rel="stylesheet" href="css/style.css?v=2026-10-12b">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -234,6 +234,7 @@
       </div>
       <div class="card">
         <p class="muted">Hver spiller regnes som én familie. Skriv gjerne navn på foresatte under Laginndeling, så kommer de med her. Familier som har hatt flest oppgaver tidligere (i historikken) blir spart først.</p>
+        <label class="check"><input type="checkbox" data-bind="tasksOnlyPresent"> Bare foresatte til barn som er med i dag (huket av under Laginndeling)</label>
         <div class="table-wrap">
           <table class="list" id="task-table">
             <thead><tr><th>Oppgave</th><th>Tidspunkt</th><th>Antall</th><th>Ansvarlige</th><th></th></tr></thead>
@@ -443,11 +444,11 @@
   <div id="print-area" class="p-doc"></div>
   <div id="toast" role="status"></div>
 
-  <script src="js/state.js?v=2026-10-12a"></script>
-  <script src="js/algorithms.js?v=2026-10-12a"></script>
-  <script src="js/print.js?v=2026-10-12a"></script>
-  <script src="js/app.js?v=2026-10-12a"></script>
-  <script src="js/intro.js?v=2026-10-12a"></script>
+  <script src="js/state.js?v=2026-10-12b"></script>
+  <script src="js/algorithms.js?v=2026-10-12b"></script>
+  <script src="js/print.js?v=2026-10-12b"></script>
+  <script src="js/app.js?v=2026-10-12b"></script>
+  <script src="js/intro.js?v=2026-10-12b"></script>
   <script data-goatcounter="https://aktivitetsdag.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
