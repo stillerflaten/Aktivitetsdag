@@ -137,6 +137,14 @@
     return out;
   }
 
+  // Familiene som kan få oppgaver: alle, eller bare de med barn som er med i dag.
+  function taskFamilyMap() {
+    const fam = familyMap();
+    if (!S.tasksOnlyPresent) return fam;
+    const present = new Set(presentPlayers().map((p) => p.id));
+    return Object.fromEntries(Object.entries(fam).filter(([id]) => present.has(id)));
+  }
+
   function historyTaskCounts() {
     const c = {};
     for (const h of S.history) for (const id of h.taskFamilies || []) c[id] = (c[id] || 0) + 1;
@@ -370,12 +378,17 @@
   }
 
   function renderTasks() {
-    const fam = familyMap();
+    const all = familyMap();
+    const fam = taskFamilyMap();
     const famOpts = Object.entries(fam).map(([id, label]) => ({ id, label }));
     $('#task-table tbody').innerHTML = S.tasks.map((t, i) => {
       const sels = [];
       for (let j = 0; j < (t.needed || 0); j++) {
-        sels.push(`<select data-path="tasks.${i}.assigned.${j}">${options(famOpts, t.assigned[j] || '', '–')}</select>`);
+        const id = t.assigned[j] || '';
+        // En familie som allerede er valgt, men ikke er med i dag, vises markert i stedet for å forsvinne.
+        const out = id && !fam[id] && all[id];
+        const opts = out ? famOpts.concat({ id, label: `${all[id]} – ikke med i dag` }) : famOpts;
+        sels.push(`<select data-path="tasks.${i}.assigned.${j}"${out ? ' class="conflict"' : ''}>${options(opts, id, '–')}</select>`);
       }
       return `<tr>
         <td><input data-path="tasks.${i}.name" value="${esc(t.name)}"></td>
@@ -389,10 +402,12 @@
     const count = {};
     S.tasks.forEach((t) => t.assigned.slice(0, t.needed).forEach((id) => { if (id) count[id] = (count[id] || 0) + 1; }));
     const total = Object.keys(fam).length;
-    const used = Object.keys(count).length;
+    const used = Object.keys(count).filter((id) => fam[id]).length;
     $('#task-info').textContent = total
-      ? `${used} av ${total} familier har fått en oppgave.`
-      : 'Legg inn spillere under Laginndeling for å kunne fordele oppgaver.';
+      ? `${used} av ${total} familier${S.tasksOnlyPresent ? ' med barn som er med i dag' : ''} har fått en oppgave.`
+      : S.tasksOnlyPresent && S.players.length
+        ? 'Ingen spillere er huket av som med i dag. Huk dem av under Laginndeling.'
+        : 'Legg inn spillere under Laginndeling for å kunne fordele oppgaver.';
   }
 
   function renderRefs() {
@@ -641,8 +656,11 @@
   }
 
   function fillTasks() {
-    const fam = Object.keys(familyMap());
-    if (!fam.length) { toast('Legg inn spillere under Laginndeling først.'); return; }
+    const fam = Object.keys(taskFamilyMap());
+    if (!fam.length) {
+      toast(S.tasksOnlyPresent && S.players.length ? 'Ingen spillere er huket av som med i dag. Huk dem av under Laginndeling, eller skru av «bare foresatte til barn som er med».' : 'Legg inn spillere under Laginndeling først.');
+      return;
+    }
     const res = Algo.makeTasks(S.tasks, fam, historyTaskCounts());
     S.tasks.forEach((t, i) => { t.assigned = res[i]; });
     const need = S.tasks.reduce((s, t) => s + (t.needed || 0), 0);

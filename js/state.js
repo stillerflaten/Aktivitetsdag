@@ -59,6 +59,7 @@
         equalGames: false
       },
       tasks: defaultTasks(),
+      tasksOnlyPresent: true, // bare foresatte til barn som er med i dag kan få oppgaver
       refs: {
         people: [], // { id, name }
         perMatch: 1,
