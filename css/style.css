@@ -348,6 +348,8 @@ dialog::backdrop { background: rgba(23, 34, 41, .45); }
 .p-runhead, .p-runfoot { font-size: 8pt; font-weight: 600; color: #2F4858; text-align: left; letter-spacing: .02em; }
 .p-runhead { padding-bottom: 1.5mm; border-bottom: .3mm solid #2F4858; margin-bottom: 3mm; }
 .p-runfoot { padding-top: 1.5mm; border-top: .3mm solid #2F4858; background: #fff; display: flex; justify-content: space-between; }
+.p-runfoot > span:first-child { font-weight: 500; }
+.p-runfoot a { color: #2F4858; font-weight: 700; text-decoration: none; }
 .p-maker { font-weight: 500; color: #5F6B72; display: inline-flex; align-items: center; gap: 4px; }
 .p-maker img { border-radius: 2px; }
 .p-wrap { width: 100%; border-collapse: collapse; }
