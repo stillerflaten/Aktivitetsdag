@@ -59,6 +59,7 @@
         equalGames: false
       },
       tasks: defaultTasks(),
+      tasksHideAssigned: false, // skjul familier som allerede har en oppgave i de andre listene
       tasksOnlyPresent: true, // bare foresatte til barn som er med i dag kan få oppgaver
       refs: {
         people: [], // { id, name }
