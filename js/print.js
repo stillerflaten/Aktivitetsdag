@@ -15,6 +15,20 @@
     return (r * 299 + g * 587 + b * 114) / 1000 > 140 ? '#111' : '#fff';
   }
 
+  // Lagfargen som svak flate (rgba), for celler i kampoppsettet. html2canvas forstår ikke color-mix.
+  function tint(hex, a) {
+    const h = (hex || '').replace('#', '');
+    if (h.length !== 6) return 'transparent';
+    const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.substr(i, 2), 16));
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // Celle med lagets farge: svak flate og en stripe til venstre.
+  function teamCell(t) {
+    if (!t) return '<td></td>';
+    return `<td class="p-tc" style="background:${tint(t.color, 0.16)};border-left:4px solid ${esc(t.color)}">${esc(t.label)}</td>`;
+  }
+
   // Logoen «Banen» som innebygd SVG, så den kommer med både i utskrift og nedlastet PDF.
   const LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><rect width="1024" height="1024" rx="225" fill="#2F4858"/>'
     + '<g fill="none" stroke="#EDE6DA" stroke-width="40" stroke-linecap="round"><rect x="212" y="292" width="600" height="440" rx="110"/>'
@@ -56,14 +70,14 @@
       html += `<tr><td>${time}</td>`;
       for (const b of banes) {
         const m = (sch.matches[slot.id] || {})[b.id];
-        html += m ? `<td>${esc((teamMap[m[0]] || {}).label)}</td><td>${esc((teamMap[m[1]] || {}).label)}</td>` : '<td></td><td></td>';
+        html += m ? teamCell(teamMap[m[0]]) + teamCell(teamMap[m[1]]) : '<td></td><td></td>';
       }
       html += '</tr>';
     }
     html += '</tbody></table>';
 
     const counts = App.matchCounts();
-    const list = Object.values(teamMap).map((t) => `<tr><td>${esc(t.label)}</td><td>${counts[t.id] || 0}</td></tr>`).join('');
+    const list = Object.values(teamMap).map((t) => `<tr><td><span class="p-dot" style="background:${esc(t.color)}"></span>${esc(t.label)}</td><td>${counts[t.id] || 0}</td></tr>`).join('');
     html += `<table class="p-table p-small"><thead><tr><th>Lag</th><th>Kamper</th></tr></thead><tbody>${list}</tbody></table>`;
     return `<section class="p-page">${heading('', 'KAMPOPPSETT' + (classes.length ? ' ' + classes.join(', ') : ''))}${html}</section>`;
   }
@@ -277,5 +291,5 @@
     pdf.save(fileName(sections));
   }
 
-  window.Print = { print, download, fileName, esc, shortDate, textOn };
+  window.Print = { print, download, fileName, esc, shortDate, textOn, tint };
 })();

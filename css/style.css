@@ -167,7 +167,7 @@ input, select, textarea {
 }
 input:hover, select:hover, textarea:hover { border-color: #CFC6B8; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus); }
-input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--ink); }
+input[type=checkbox] { width: 17px; height: 17px; flex: none; accent-color: var(--ink); }
 input[type=color] { width: 42px; height: 32px; padding: 2px; }
 input.short { max-width: 110px; }
 input.tiny { max-width: 64px; }
@@ -237,6 +237,9 @@ td.assign select { flex: 1 1 180px; }
 .team-card li select { width: auto; max-width: 130px; font-size: .8rem; padding: 2px 4px; }
 
 .counts { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 16px; }
+table.grid td.tc { background: var(--tc-soft); box-shadow: inset 4px 0 0 var(--tc); }
+table.grid td.tc select { background-color: transparent; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: -1px; }
 .counts li { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 4px 0; }
 
 .history { list-style: none; padding: 0; margin: 0; }
@@ -373,6 +376,8 @@ label.inline input { width: 90px; margin: 0; }
 .p-table thead th { background: #2F4858; color: #fff; border-color: #44606F; font-weight: 700; font-size: 8.5pt; }
 .p-table tbody tr:nth-child(even):not(.p-break) td { background: #F8F5F0; }
 .p-table td:first-child { font-weight: 600; color: #2F4858; white-space: nowrap; }
+.p-table td.p-tc { font-weight: 600; }
+.p-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
 .p-table tr.p-break td { background: #F1E6D6; color: #8A4E37; text-align: center; font-weight: 700; }
 .p-table tr.p-break td:first-child { text-align: left; color: #8A4E37; }
 .p-small { width: auto; min-width: 40%; break-inside: avoid; page-break-inside: avoid; }

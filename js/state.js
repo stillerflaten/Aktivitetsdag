@@ -2,7 +2,8 @@
 (function () {
   const KEY = 'aktivitetsdag.v1';
 
-  const COLORS = ['#C9785A', '#5B8BA0', '#D8B45C', '#6F9A78', '#2F4858', '#9A7BA6', '#4F9A94', '#C98A9A', '#8C7B6B', '#7D8C96'];
+  const COLORS = ['#C9785A', '#5B8BA0', '#D8B45C', '#6F9A78', '#2F4858', '#9A7BA6', '#4F9A94', '#C98A9A', '#8C7B6B', '#7D8C96',
+    '#A8645C', '#7F9A55', '#B98F5E', '#5E7896', '#8E6F8C', '#6E8F7F'];
   const TEAM_NAMES = ['Ørn', 'Ulv', 'Bjørn', 'Rev', 'Gaupe', 'Elg', 'Ugle', 'Oter', 'Hare', 'Ekorn'];
   const SPORTS = [
     ['Fotball', '⚽'], ['Håndball', '🤾'], ['Ishockey', '🏒'], ['Bandy', '🏑'], ['Innebandy', '🏑'],
@@ -48,7 +49,7 @@
       },
       schedule: {
         includeOwn: true,
-        guests: [], // { id, name, club, klasse }
+        guests: [], // { id, name, club, klasse, color }
         banes: [{ id: uid('b'), name: 'Bane 1', klasse: '' }, { id: uid('b'), name: 'Bane 2', klasse: '' }],
         timing: { mode: 'games', gamesPerTeam: 4, start: '09:30', matchMin: 15, breakMin: 10, rounds: 8, endLabel: 'Premieutdeling og rydding', endMin: 40 },
         slots: [], // { id, from, to, type: 'match'|'break', label }

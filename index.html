@@ -14,7 +14,7 @@
   <meta name="theme-color" content="#2F4858">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
   <script>try { var t = localStorage.getItem('aktivitetsdag.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
-  <link rel="stylesheet" href="css/style.css?v=2026-10-13c">
+  <link rel="stylesheet" href="css/style.css?v=2026-10-13e">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -171,7 +171,7 @@
           <label class="check"><input type="checkbox" data-bind="schedule.includeOwn"> Ta med egne lag fra laginndelingen</label>
           <p class="muted">Skriv inn lagene som kommer på besøk (og eventuelt egne lag i andre årsklasser). Klasse brukes til å plassere lag på riktig bane.</p>
           <table class="list" id="guest-table">
-            <thead><tr><th>Lagnavn</th><th>Klubb</th><th>Klasse</th><th></th></tr></thead>
+            <thead><tr><th>Farge</th><th>Lagnavn</th><th>Klubb</th><th>Klasse</th><th></th></tr></thead>
             <tbody></tbody>
           </table>
           <div class="row"><button class="btn" id="btn-add-guest"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg> Legg til lag</button></div>
@@ -208,7 +208,7 @@
           <p class="muted">En <b>kamprunde</b> er ett tidspunkt der alle banene spiller samtidig. Du kan også endre hvert tidspunkt direkte i tabellen under, og legge inn pauser (f.eks. vanning) der du vil.</p>
 
           <h2>Regler</h2>
-          <label class="check"><input type="checkbox" data-bind="schedule.sameClass"> Lagene spiller bare mot lag i samme klasse <span class="muted">(alle banene deles, og klassene bytter bane fra runde til runde)</span></label>
+          <label class="check"><input type="checkbox" data-bind="schedule.sameClass"> <span>Lagene spiller bare mot lag i samme klasse <span class="muted">(alle banene deles, og klassene bytter bane fra runde til runde)</span></span></label>
           <label class="check"><input type="checkbox" data-bind="schedule.avoidSameClub"> Unngå kamper mellom lag fra samme klubb</label>
           <label class="check"><input type="checkbox" data-bind="schedule.avoidBackToBack"> Unngå at et lag spiller to kamper på rad</label>
           <label class="check"><input type="checkbox" data-bind="schedule.avoidThreeInRow"> Unngå at et lag spiller tre kamper på rad</label>
@@ -447,11 +447,11 @@
   <div id="print-area" class="p-doc"></div>
   <div id="toast" role="status"></div>
 
-  <script src="js/state.js?v=2026-10-13c"></script>
-  <script src="js/algorithms.js?v=2026-10-13c"></script>
-  <script src="js/print.js?v=2026-10-13c"></script>
-  <script src="js/app.js?v=2026-10-13c"></script>
-  <script src="js/intro.js?v=2026-10-13c"></script>
+  <script src="js/state.js?v=2026-10-13e"></script>
+  <script src="js/algorithms.js?v=2026-10-13e"></script>
+  <script src="js/print.js?v=2026-10-13e"></script>
+  <script src="js/app.js?v=2026-10-13e"></script>
+  <script src="js/intro.js?v=2026-10-13e"></script>
   <script data-goatcounter="https://aktivitetsdag.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

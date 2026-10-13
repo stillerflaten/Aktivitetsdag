@@ -121,14 +121,38 @@
     const map = {};
     if (S.schedule.includeOwn && presentPlayers().length) {
       for (const t of currentTeams()) {
-        map[t.id] = { id: t.id, label: teamLabel(t.name, S.event.club, t.klasse), club: S.event.club, klasse: t.klasse };
+        map[t.id] = { id: t.id, label: teamLabel(t.name, S.event.club, t.klasse), club: S.event.club, klasse: t.klasse, color: t.color };
       }
     }
+    const colors = guestColors();
     for (const g of S.schedule.guests) {
       if (!g.name.trim()) continue;
-      map[g.id] = { id: g.id, label: teamLabel(g.name, g.club, g.klasse), club: g.club, klasse: g.klasse };
+      map[g.id] = { id: g.id, label: teamLabel(g.name, g.club, g.klasse), club: g.club, klasse: g.klasse, color: colors[g.id] };
     }
     return map;
+  }
+
+  // Besøkende lag uten egen farge får den første ledige fra paletten, så ingen lag deler farge
+  // så lenge paletten rekker. Egne lag og lag med valgt farge beholder sin.
+  function guestColors() {
+    const used = new Set();
+    if (S.schedule.includeOwn) S.teams.names.slice(0, teamCount()).forEach((t) => used.add((t.color || '').toLowerCase()));
+    S.schedule.guests.forEach((g) => g.color && used.add(g.color.toLowerCase()));
+    // Den mørke skiferfargen hoppes over: den er sidens egen farge og forsvinner i mørk modus.
+    const free = Store.COLORS.filter((c) => !used.has(c.toLowerCase()) && c !== '#2F4858');
+    const out = {};
+    let n = 0;
+    for (const g of S.schedule.guests) {
+      if (g.color) { out[g.id] = g.color; continue; }
+      out[g.id] = free[n] || Store.COLORS[n % Store.COLORS.length];
+      n++;
+    }
+    return out;
+  }
+
+  // Lagfargen som en svak flate med en tydelig stripe til venstre, så den ikke blir glorete.
+  function teamStyle(t) {
+    return t && t.color ? ` style="--tc:${esc(t.color)};--tc-soft:${Print.tint(t.color, 0.16)}"` : '';
   }
 
   // Grupper som skal ha like mange kamper: puljene, og med «bare egen klasse» hver klasse i puljen.
@@ -288,13 +312,15 @@
   }
 
   function renderGuests() {
+    const colors = guestColors();
     $('#guest-table tbody').innerHTML = S.schedule.guests.map((g, i) => `
       <tr>
+        <td><input type="color" data-path="schedule.guests.${i}.color" value="${esc(colors[g.id])}" title="Lagfarge i kampoppsettet"></td>
         <td><input data-path="schedule.guests.${i}.name" value="${esc(g.name)}" placeholder="Redwings"></td>
         <td><input data-path="schedule.guests.${i}.club" value="${esc(g.club)}" placeholder="Nidaros" list="club-list"></td>
         <td><input data-path="schedule.guests.${i}.klasse" value="${esc(g.klasse)}" placeholder="U9" list="class-list" class="short"></td>
         <td><button class="icon" data-action="del-guest" data-i="${i}" title="Fjern">✕</button></td>
-      </tr>`).join('') || '<tr><td colspan="4" class="muted">Ingen besøkende lag ennå.</td></tr>';
+      </tr>`).join('') || '<tr><td colspan="5" class="muted">Ingen besøkende lag ennå.</td></tr>';
     const clubs = [...new Set(S.schedule.guests.map((g) => g.club).filter(Boolean))];
     let dl = $('#club-list');
     if (!dl) { dl = document.createElement('datalist'); dl.id = 'club-list'; document.body.appendChild(dl); }
@@ -354,6 +380,7 @@
     const sch = S.schedule;
     const banes = sch.banes;
     const opts = baneTeamOptions();
+    const tm = teamMap();
     let html = `<thead><tr><th>Tidspunkt</th>${banes.map((b) => `<th colspan="2">${esc(b.name)}${b.klasse ? ' <small>' + esc(b.klasse) + '</small>' : ''}</th>`).join('')}<th></th></tr></thead><tbody>`;
     sch.slots.forEach((slot, i) => {
       if (slot.type === 'break') {
@@ -371,7 +398,8 @@
         const m = row[b.id] || ['', ''];
         for (const side of [0, 1]) {
           const id = m[side] || '';
-          html += `<td class="${seen[id] > 1 ? 'conflict' : ''}"><select data-path="schedule.matches.${slot.id}.${b.id}.${side}">${options(opts[b.id] || [], id)}</select></td>`;
+          const cls = [seen[id] > 1 ? 'conflict' : '', tm[id] ? 'tc' : ''].filter(Boolean).join(' ');
+          html += `<td class="${cls}"${seen[id] > 1 ? '' : teamStyle(tm[id])}><select data-path="schedule.matches.${slot.id}.${b.id}.${side}">${options(opts[b.id] || [], id)}</select></td>`;
         }
       }
       html += `<td><button class="icon" data-action="del-slot" data-i="${i}" title="Fjern">✕</button></td></tr>`;
@@ -382,7 +410,7 @@
     const counts = matchCounts();
     const teams = Object.values(teamMap());
     $('#match-count').innerHTML = teams.length
-      ? '<ul class="counts">' + teams.map((t) => `<li><span>${esc(t.label)}</span><b>${counts[t.id] || 0}</b></li>`).join('') + '</ul>'
+      ? '<ul class="counts">' + teams.map((t) => `<li><span><i class="dot" style="background:${esc(t.color)}"></i>${esc(t.label)}</span><b>${counts[t.id] || 0}</b></li>`).join('') + '</ul>'
       : '<p class="muted">Ingen lag ennå.</p>';
   }
 
