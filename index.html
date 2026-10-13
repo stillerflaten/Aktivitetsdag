@@ -14,7 +14,7 @@
   <meta name="theme-color" content="#2F4858">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
   <script>try { var t = localStorage.getItem('aktivitetsdag.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
-  <link rel="stylesheet" href="css/style.css?v=2026-10-12c">
+  <link rel="stylesheet" href="css/style.css?v=2026-10-13a">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -109,13 +109,14 @@
       <div class="cols">
         <div class="card">
           <h2>Spillere <span class="badge" id="player-count"></span></h2>
-          <p class="muted">Lim inn en liste med navn (ett per linje), eller legg til én og én. Fjern haken for de som ikke er med denne dagen.</p>
+          <p class="muted">Lim inn en liste med navn (ett per linje), eller legg til én og én. Fjern haken for de som ikke er med denne dagen. Har dere flere klasser samme dag (f.eks. micro med U6, U7 og U8), skriver du klassen før du limer inn listen for hver klasse. Da lages lagene klasse for klasse.</p>
           <textarea id="player-paste" rows="3" placeholder="Ola Nordmann&#10;Kari Nordmann&#10;…"></textarea>
           <div class="row">
+            <label class="inline">Klasse <span class="muted">(valgfritt)</span> <input id="player-class" list="class-list" class="short" placeholder="U7"></label>
             <button class="btn" id="btn-add-players">Legg til navn</button>
           </div>
           <table class="list" id="player-table">
-            <thead><tr><th>Med</th><th>Navn</th><th>Foresatte <span class="muted">(valgfritt)</span></th><th></th></tr></thead>
+            <thead><tr><th>Med</th><th>Navn</th><th>Klasse</th><th>Foresatte <span class="muted">(valgfritt)</span></th><th></th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -140,7 +141,7 @@
           </div>
           <p class="muted" id="team-info"></p>
           <table class="list" id="team-table">
-            <thead><tr><th>Farge</th><th>Lagnavn</th><th>Trenere</th></tr></thead>
+            <thead><tr><th>Farge</th><th>Lagnavn</th><th id="team-class-th" hidden>Klasse</th><th>Trenere</th></tr></thead>
             <tbody></tbody>
           </table>
           <div class="row">
@@ -445,11 +446,11 @@
   <div id="print-area" class="p-doc"></div>
   <div id="toast" role="status"></div>
 
-  <script src="js/state.js?v=2026-10-12c"></script>
-  <script src="js/algorithms.js?v=2026-10-12c"></script>
-  <script src="js/print.js?v=2026-10-12c"></script>
-  <script src="js/app.js?v=2026-10-12c"></script>
-  <script src="js/intro.js?v=2026-10-12c"></script>
+  <script src="js/state.js?v=2026-10-13a"></script>
+  <script src="js/algorithms.js?v=2026-10-13a"></script>
+  <script src="js/print.js?v=2026-10-13a"></script>
+  <script src="js/app.js?v=2026-10-13a"></script>
+  <script src="js/intro.js?v=2026-10-13a"></script>
   <script data-goatcounter="https://aktivitetsdag.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

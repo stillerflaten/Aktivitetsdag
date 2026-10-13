@@ -32,7 +32,7 @@
     const teams = App.currentTeams();
     const cols = teams.map((t) => `
       <div class="p-team" style="--c:${esc(t.color)}">
-        <div class="p-team-name" style="background:${esc(t.color)};color:${textOn(t.color)}">${esc(App.teamLabel(t.name, S.event.club, S.event.ageGroup))}</div>
+        <div class="p-team-name" style="background:${esc(t.color)};color:${textOn(t.color)}">${esc(App.teamLabel(t.name, S.event.club, t.klasse))}</div>
         ${t.coaches ? `<div class="p-team-coach">${esc(t.coaches)}</div>` : ''}
         <ol>${t.players.map((p) => `<li>${esc(p.name)}</li>`).join('')}</ol>
       </div>`).join('');

@@ -317,6 +317,10 @@ dialog::backdrop { background: rgba(23, 34, 41, .45); }
 .seg input:checked + span { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(23, 34, 41, .15); }
 .seg input:focus-visible + span { box-shadow: var(--focus); }
 
+/* Liten etikett på samme linje som knapper, f.eks. klasse for nye spillere */
+label.inline { display: inline-flex; flex-direction: row; align-items: center; gap: 8px; margin: 0; }
+label.inline input { width: 90px; margin: 0; }
+
 /* Bunnlinje med avsender */
 .site-foot {
   max-width: 1240px; margin: 0 auto; padding: 18px 16px 28px;
