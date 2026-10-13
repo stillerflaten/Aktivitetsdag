@@ -2,8 +2,20 @@
 (function () {
   const KEY = 'aktivitetsdag.v1';
 
-  const COLORS = ['#C9785A', '#5B8BA0', '#D8B45C', '#6F9A78', '#2F4858', '#9A7BA6', '#4F9A94', '#C98A9A', '#8C7B6B', '#7D8C96',
-    '#A8645C', '#7F9A55', '#B98F5E', '#5E7896', '#8E6F8C', '#6E8F7F'];
+  // Lagfarger: dempede, men tydelig forskjellige toner som passer med logoens farger.
+  const COLORS = ['#D0704C', '#4C88A8', '#DDB04A', '#5E9E6C', '#2F4858', '#9670AA', '#CF7F93', '#3E9C93', '#8E7660', '#6F8696',
+    '#B0574E', '#7FA046', '#C28A4E', '#5470A0', '#93638F', '#5F9079'];
+  // Den første, blekere paletten. Lag som fortsatt har en av disse fargene, får den nye tonen.
+  const NEW_OF = { '#C9785A': '#D0704C', '#5B8BA0': '#4C88A8', '#D8B45C': '#DDB04A', '#6F9A78': '#5E9E6C', '#9A7BA6': '#9670AA',
+    '#4F9A94': '#3E9C93', '#C98A9A': '#CF7F93', '#8C7B6B': '#8E7660', '#7D8C96': '#6F8696', '#A8645C': '#B0574E',
+    '#7F9A55': '#7FA046', '#B98F5E': '#C28A4E', '#5E7896': '#5470A0', '#8E6F8C': '#93638F', '#6E8F7F': '#5F9079' };
+  function upgradeColors(st) {
+    const fix = (o) => { const c = (o.color || '').toUpperCase(); if (NEW_OF[c]) o.color = NEW_OF[c]; };
+    ((st.teams || {}).names || []).forEach(fix);
+    ((st.schedule || {}).guests || []).forEach(fix);
+    return st;
+  }
+
   const TEAM_NAMES = ['Ørn', 'Ulv', 'Bjørn', 'Rev', 'Gaupe', 'Elg', 'Ugle', 'Oter', 'Hare', 'Ekorn'];
   const SPORTS = [
     ['Fotball', '⚽'], ['Håndball', '🤾'], ['Ishockey', '🏒'], ['Bandy', '🏑'], ['Innebandy', '🏑'],
@@ -91,7 +103,7 @@
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) return merge(defaults(), JSON.parse(raw));
+      if (raw) return upgradeColors(merge(defaults(), JSON.parse(raw)));
     } catch (e) { /* tom eller blokkert lagring */ }
     return defaults();
   }
@@ -105,7 +117,7 @@
   }
 
   function replace(obj) {
-    window.S = merge(defaults(), obj);
+    window.S = upgradeColors(merge(defaults(), obj));
     save();
   }
 
