@@ -49,10 +49,39 @@
 
   const presentPlayers = () => S.players.filter((p) => p.present && p.name.trim());
 
+  // Klassen til en spiller: egen klasse hvis satt, ellers årsklassen for egne lag.
+  const playerClass = (p) => (p.klasse || '').trim() || (S.event.ageGroup || '').trim();
+  const byClass = (a, b) => a.localeCompare(b, 'nb', { numeric: true });
+
+  // Når spillerne er i flere klasser (f.eks. micro med U6, U7 og U8), lages lagene klasse for klasse.
+  // Gir null når alle er i samme klasse.
+  function classPlan() {
+    const groups = {};
+    for (const p of presentPlayers()) (groups[playerClass(p)] = groups[playerClass(p)] || []).push(p.id);
+    const keys = Object.keys(groups).sort(byClass);
+    if (keys.length < 2) return null;
+    return keys.map((klasse) => {
+      const n = groups[klasse].length;
+      const k = S.teams.mode === 'count'
+        ? Math.max(1, Math.min(n, S.teams.count || 1))
+        : Math.max(1, Math.ceil(n / Math.max(1, S.teams.perTeam || 1)));
+      return { klasse, ids: groups[klasse], k };
+    });
+  }
+
   function teamCount() {
+    const plan = classPlan();
+    if (plan) return plan.reduce((s, c) => s + c.k, 0);
     const n = presentPlayers().length;
     if (S.teams.mode === 'count') return Math.max(1, S.teams.count || 1);
     return Math.max(1, Math.ceil(n / Math.max(1, S.teams.perTeam || 1)));
+  }
+
+  // Klassen til hvert lag, i samme rekkefølge som lagnavnene.
+  function teamClasses() {
+    const plan = classPlan();
+    if (!plan) return [];
+    return plan.flatMap((c) => Array(c.k).fill(c.klasse));
   }
 
   function ensureTeamNames(k) {
@@ -70,7 +99,8 @@
   function currentTeams() {
     const k = teamCount();
     ensureTeamNames(k);
-    const teams = S.teams.names.slice(0, k).map((t) => ({ ...t, players: [] }));
+    const classes = teamClasses();
+    const teams = S.teams.names.slice(0, k).map((t, i) => ({ ...t, klasse: classes[i] || (S.event.ageGroup || '').trim(), players: [] }));
     const byId = Object.fromEntries(teams.map((t) => [t.id, t]));
     for (const p of presentPlayers()) {
       const t = byId[S.teams.assignment[p.id]];
@@ -91,7 +121,7 @@
     const map = {};
     if (S.schedule.includeOwn && presentPlayers().length) {
       for (const t of currentTeams()) {
-        map[t.id] = { id: t.id, label: teamLabel(t.name, S.event.club, S.event.ageGroup), club: S.event.club, klasse: S.event.ageGroup };
+        map[t.id] = { id: t.id, label: teamLabel(t.name, S.event.club, t.klasse), club: S.event.club, klasse: t.klasse };
       }
     }
     for (const g of S.schedule.guests) {
@@ -185,9 +215,10 @@
       <tr class="${p.present ? '' : 'absent'}">
         <td><input type="checkbox" data-path="players.${i}.present"${p.present ? ' checked' : ''}></td>
         <td><input data-path="players.${i}.name" value="${esc(p.name)}"></td>
+        <td><input data-path="players.${i}.klasse" value="${esc(p.klasse || '')}" placeholder="${esc(S.event.ageGroup || '')}" list="class-list" class="short" aria-label="Klasse"></td>
         <td><input data-path="players.${i}.parents" value="${esc(p.parents || '')}" placeholder="Navn på foresatte"></td>
         <td><button class="icon" data-action="del-player" data-i="${i}" title="Fjern">✕</button></td>
-      </tr>`).join('') || '<tr><td colspan="4" class="muted">Ingen spillere ennå.</td></tr>';
+      </tr>`).join('') || '<tr><td colspan="5" class="muted">Ingen spillere ennå.</td></tr>';
   }
 
   function renderTeamSettings() {
@@ -198,20 +229,27 @@
     const n = presentPlayers().length;
     const min = Math.floor(n / k);
     const max = Math.ceil(n / k);
-    $('#team-info').textContent = n
-      ? `${n} spillere blir ${k} lag med ${min === max ? min : min + '–' + max} spillere hver.`
-      : 'Legg inn spillere først.';
+    const plan = classPlan();
+    $('#lbl-count').firstChild.textContent = plan ? 'Antall lag per klasse' : 'Antall lag';
+    $('#team-info').textContent = plan
+      ? 'Lagene lages klasse for klasse: ' + plan.map((c) => `${c.klasse || 'uten klasse'} ${c.ids.length} spillere i ${c.k} lag`).join(', ') + '.'
+      : n
+        ? `${n} spillere blir ${k} lag med ${min === max ? min : min + '–' + max} spillere hver.`
+        : 'Legg inn spillere først.';
+    const classes = teamClasses();
+    $('#team-class-th').hidden = !plan;
     $('#team-table tbody').innerHTML = S.teams.names.slice(0, k).map((t, i) => `
       <tr>
         <td><input type="color" data-path="teams.names.${i}.color" value="${esc(t.color)}"></td>
-        <td><input data-path="teams.names.${i}.name" value="${esc(t.name)}"></td>
+        <td><input data-path="teams.names.${i}.name" value="${esc(t.name)}"></td>${plan ? `<td><b>${esc(classes[i])}</b></td>` : ''}
         <td><input data-path="teams.names.${i}.coaches" value="${esc(t.coaches)}" placeholder="Trener 1/Trener 2"></td>
       </tr>`).join('');
   }
 
   function renderTeamResult() {
     const teams = currentTeams();
-    const opts = teams.map((t) => ({ id: t.id, label: t.name }));
+    const multi = !!classPlan();
+    const opts = teams.map((t) => ({ id: t.id, label: multi ? `${t.name} ${t.klasse}` : t.name }));
     const assigned = new Set(teams.flatMap((t) => t.players.map((p) => p.id)));
     const unassigned = presentPlayers().filter((p) => !assigned.has(p.id));
     const playerRow = (p, teamId) => `
@@ -219,7 +257,7 @@
         <select data-path="teams.assignment.${p.id}" aria-label="Flytt ${esc(p.name)}">${options(opts, teamId, '– uten lag –')}</select></li>`;
     let html = teams.map((t) => `
       <div class="team-card">
-        <div class="team-head" style="background:${esc(t.color)};color:${Print.textOn(t.color)}">${esc(t.name)} <small>(${t.players.length})</small></div>
+        <div class="team-head" style="background:${esc(t.color)};color:${Print.textOn(t.color)}">${esc(t.name)}${multi ? ' ' + esc(t.klasse) : ''} <small>(${t.players.length})</small></div>
         <div class="team-coach">${esc(t.coaches)}</div>
         <ul>${t.players.map((p) => playerRow(p, t.id)).join('')}</ul>
       </div>`).join('');
@@ -233,6 +271,7 @@
   function classOptions() {
     const set = new Set();
     if (S.schedule.includeOwn && S.event.ageGroup) set.add(S.event.ageGroup);
+    if (S.schedule.includeOwn) S.players.forEach((p) => p.klasse && p.klasse.trim() && set.add(p.klasse.trim()));
     S.schedule.guests.forEach((g) => g.klasse && set.add(g.klasse));
     return [...set];
   }
@@ -485,11 +524,12 @@
   function addPlayers() {
     const names = $('#player-paste').value.split(/\n|;/).map((s) => s.trim()).filter(Boolean);
     if (!names.length) { toast('Skriv inn minst ett navn.'); return; }
+    const klasse = $('#player-class').value.trim();
     const existing = new Set(S.players.map((p) => p.name.toLowerCase()));
     let added = 0;
     for (const name of names) {
       if (existing.has(name.toLowerCase())) continue;
-      S.players.push({ id: Store.uid('p'), name, present: true, parents: '' });
+      S.players.push({ id: Store.uid('p'), name, present: true, parents: '', klasse });
       existing.add(name.toLowerCase());
       added++;
     }
@@ -502,7 +542,11 @@
     if (players.length < 2) { toast('Legg inn minst to spillere først.'); return; }
     const k = teamCount();
     ensureTeamNames(k);
-    const groups = Algo.makeTeams(players.map((p) => p.id), k, S.teams.method, S.history);
+    const plan = classPlan();
+    // Med flere klasser deles hver klasse for seg, så lagene bare får spillere fra én klasse.
+    const groups = plan
+      ? plan.flatMap((c) => Algo.makeTeams(c.ids, c.k, S.teams.method, S.history))
+      : Algo.makeTeams(players.map((p) => p.id), k, S.teams.method, S.history);
     S.teams.assignment = {};
     groups.forEach((g, i) => g.forEach((id) => { S.teams.assignment[id] = S.teams.names[i].id; }));
     const repeats = S.history.length ? Algo.countRepeats(groups, S.history) : 0;
