@@ -14,7 +14,7 @@
   <meta name="theme-color" content="#2F4858">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
   <script>try { var t = localStorage.getItem('aktivitetsdag.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
-  <link rel="stylesheet" href="css/style.css?v=2026-10-13b">
+  <link rel="stylesheet" href="css/style.css?v=2026-10-13c">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -82,7 +82,7 @@
           </label>
           <label>Sted / hall / bane<input data-bind="event.place" placeholder="Dalgård ishall"></label>
           <label>Egen klubb<input data-bind="event.club" placeholder="Astor"></label>
-          <label>Årsklasse for egne lag<input data-bind="event.ageGroup" placeholder="U9"></label>
+          <label>Årsklasse for egne lag<input data-bind="event.ageGroup" placeholder="U9" aria-describedby="agegroup-help"><span class="field-help" id="agegroup-help">Er flere klasser med samme dag (f.eks. micro med U6, U7 og U8), lar du feltet stå tomt og skriver klassen på hver spiller under Laginndeling.</span></label>
         </div>
       </div>
 
@@ -447,11 +447,11 @@
   <div id="print-area" class="p-doc"></div>
   <div id="toast" role="status"></div>
 
-  <script src="js/state.js?v=2026-10-13b"></script>
-  <script src="js/algorithms.js?v=2026-10-13b"></script>
-  <script src="js/print.js?v=2026-10-13b"></script>
-  <script src="js/app.js?v=2026-10-13b"></script>
-  <script src="js/intro.js?v=2026-10-13b"></script>
+  <script src="js/state.js?v=2026-10-13c"></script>
+  <script src="js/algorithms.js?v=2026-10-13c"></script>
+  <script src="js/print.js?v=2026-10-13c"></script>
+  <script src="js/app.js?v=2026-10-13c"></script>
+  <script src="js/intro.js?v=2026-10-13c"></script>
   <script data-goatcounter="https://aktivitetsdag.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
