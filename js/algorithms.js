@@ -126,19 +126,36 @@
     return [...map.values()];
   }
 
+  // Hvor mange baner som kan brukes samtidig. Med «bare egen klasse» kan hver klasse fylle
+  // så mange baner som den har par av lag.
+  function usableBanes(teams, nBanes, sameClass) {
+    if (!sameClass) return Math.min(nBanes, Math.floor(teams.length / 2));
+    const per = {};
+    for (const t of teams) { const k = (t.klasse || '').trim().toLowerCase(); per[k] = (per[k] || 0) + 1; }
+    return Math.min(nBanes, Object.values(per).reduce((s, n) => s + Math.floor(n / 2), 0));
+  }
+
   function schedulePulje(teams, baneIds, slotIds, opts) {
     const ids = teams.map((t) => t.id);
     const club = Object.fromEntries(teams.map((t) => [t.id, (t.club || '').trim().toLowerCase()]));
-    const nB = Math.min(baneIds.length, Math.floor(ids.length / 2));
+    // Med «bare egen klasse» møter lagene bare lag i samme klasse, men alle banene deles.
+    const cls = Object.fromEntries(teams.map((t) => [t.id, opts.sameClass ? (t.klasse || '').trim().toLowerCase() : '']));
+    const size = {};
+    for (const id of ids) size[cls[id]] = (size[cls[id]] || 0) + 1;
+    const nB = usableBanes(teams, baneIds.length, opts.sameClass);
     if (nB === 0) return {};
 
     // Med «like mange kamper» får ingen lag flere kamper enn alle kan få.
-    // Noen baner kan da stå tomme i enkelte runder.
-    let cap = Infinity;
-    if (opts.targetGames) cap = opts.targetGames;
-    if (opts.equalGames) {
-      cap = Math.min(cap, Math.floor((slotIds.length * nB * 2) / ids.length));
-      if ((cap * ids.length) % 2) cap--;
+    // Noen baner kan da stå tomme i enkelte runder. Taket regnes for hver klasse.
+    const caps = {};
+    for (const k of Object.keys(size)) {
+      let cap = Infinity;
+      if (opts.targetGames) cap = opts.targetGames;
+      if (opts.equalGames) {
+        cap = Math.min(cap, Math.floor((slotIds.length * nB * 2) / ids.length));
+        if ((cap * size[k]) % 2) cap--;
+      }
+      caps[k] = cap;
     }
 
     let best = null;
@@ -160,14 +177,16 @@
         for (let bi = 0; bi < nB; bi++) {
           // «Tre på rad» er en fast regel: et lag som har spilt de to siste rundene, må hvile.
           const tired = (id) => opts.avoidThreeInRow && last[id] === si - 1 && streak[id] >= 2;
-          const avail = ids.filter((id) => !used.has(id) && games[id] < cap && !tired(id));
+          const free = ids.filter((id) => !used.has(id) && games[id] < caps[cls[id]] && !tired(id));
+          // Bare lag som har en motstander i samme klasse ledig, kan settes opp.
+          const avail = free.filter((id) => free.some((o) => o !== id && cls[o] === cls[id]));
           if (avail.length < 2) break;
           const rest = (id) => {
             if (last[id] !== si - 1) return 0;
             return (opts.avoidBackToBack ? 5 : 0) + (opts.avoidThreeInRow && streak[id] >= 2 ? 25 : 0);
           };
           const a = argmin(avail, (id) => games[id] * 10 + rest(id) + Math.random() * 3);
-          const b = argmin(avail.filter((id) => id !== a), (id) =>
+          const b = argmin(avail.filter((id) => id !== a && cls[id] === cls[a]), (id) =>
             games[id] * 10 + rest(id) +
             (pairs.get(pairKey(a, id)) || 0) * 9 +
             (opts.avoidSameClub && club[a] && club[a] === club[id] ? 7 : 0) +
@@ -190,8 +209,13 @@
         }
       });
 
-      const g = Object.values(games);
-      const score = (Math.max(...g) - Math.min(...g)) * 100 + repeats * 12 +
+      // Ulikt antall kamper telles innen hver klasse.
+      let spread = 0;
+      for (const k of Object.keys(size)) {
+        const g = ids.filter((id) => cls[id] === k).map((id) => games[id]);
+        spread += Math.max(...g) - Math.min(...g);
+      }
+      const score = spread * 100 + repeats * 12 +
         (opts.avoidBackToBack ? backToBack * 6 : 0) + (opts.avoidThreeInRow ? threeInRow * 40 : 0) +
         (opts.avoidSameClub ? sameClub * 8 : 0);
       if (score < bestScore) { bestScore = score; best = result; }
@@ -296,5 +320,5 @@
     });
   }
 
-  window.Algo = { shuffle, makeTeams, countRepeats, puljer, makeSchedule, makeRefs, refGroups, makeTasks, parseRange };
+  window.Algo = { usableBanes, shuffle, makeTeams, countRepeats, puljer, makeSchedule, makeRefs, refGroups, makeTasks, parseRange };
 })();
