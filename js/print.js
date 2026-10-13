@@ -26,7 +26,7 @@
   // Celle med lagets farge: svak flate og en stripe til venstre.
   function teamCell(t) {
     if (!t) return '<td></td>';
-    return `<td class="p-tc" style="background:${tint(t.color, 0.16)};border-left:4px solid ${esc(t.color)}">${esc(t.label)}</td>`;
+    return `<td class="p-tc" style="background:${tint(t.color, 0.26)};border-left:4px solid ${esc(t.color)}">${esc(t.label)}</td>`;
   }
 
   // Logoen «Banen» som innebygd SVG, så den kommer med både i utskrift og nedlastet PDF.

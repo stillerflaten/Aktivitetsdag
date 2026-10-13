@@ -152,7 +152,7 @@
 
   // Lagfargen som en svak flate med en tydelig stripe til venstre, så den ikke blir glorete.
   function teamStyle(t) {
-    return t && t.color ? ` style="--tc:${esc(t.color)};--tc-soft:${Print.tint(t.color, 0.16)}"` : '';
+    return t && t.color ? ` style="--tc:${esc(t.color)};--tc-soft:${Print.tint(t.color, 0.26)}"` : '';
   }
 
   // Grupper som skal ha like mange kamper: puljene, og med «bare egen klasse» hver klasse i puljen.
