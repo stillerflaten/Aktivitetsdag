@@ -167,7 +167,7 @@ input, select, textarea {
 }
 input:hover, select:hover, textarea:hover { border-color: #CFC6B8; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus); }
-input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--ink); }
+input[type=checkbox] { width: 17px; height: 17px; flex: none; accent-color: var(--ink); }
 input[type=color] { width: 42px; height: 32px; padding: 2px; }
 input.short { max-width: 110px; }
 input.tiny { max-width: 64px; }
