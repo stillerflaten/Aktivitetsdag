@@ -56,6 +56,7 @@
         avoidSameClub: true,
         avoidBackToBack: true,
         avoidThreeInRow: true,
+        sameClass: false, // lag møter bare egen klasse, men alle banene deles
         equalGames: false
       },
       tasks: defaultTasks(),

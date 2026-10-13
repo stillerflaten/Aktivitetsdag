@@ -131,6 +131,17 @@
     return map;
   }
 
+  // Grupper som skal ha like mange kamper: puljene, og med «bare egen klasse» hver klasse i puljen.
+  function fairGroups(teams) {
+    const pul = Algo.puljer(teams, S.schedule.banes);
+    if (!S.schedule.sameClass) return pul;
+    return pul.flatMap((p) => {
+      const by = {};
+      for (const t of p.teams) (by[(t.klasse || '').trim().toLowerCase()] = by[(t.klasse || '').trim().toLowerCase()] || []).push(t);
+      return Object.values(by).map((ts) => ({ ...p, label: ts[0].klasse || p.label, teams: ts }));
+    });
+  }
+
   function matchSlots() {
     return S.schedule.slots.filter((s) => s.type === 'match');
   }
@@ -394,9 +405,14 @@
       }
       if (tired.length) out.push(`${listNames(tired)} spiller tre kamper på rad`);
     }
+    if (S.schedule.sameClass) {
+      const cross = slots.some((s) => Object.values(S.schedule.matches[s.id] || {}).some((m) =>
+        m && m[0] && m[1] && tm[m[0]] && tm[m[1]] && (tm[m[0]].klasse || '') !== (tm[m[1]].klasse || '')));
+      if (cross) out.push('noen kamper er mellom lag i ulike klasser');
+    }
     if (S.schedule.equalGames) {
       const c = matchCounts();
-      const uneven = Algo.puljer(Object.values(tm), S.schedule.banes).some((p) => {
+      const uneven = fairGroups(Object.values(tm)).some((p) => {
         const g = p.teams.map((t) => c[t.id] || 0);
         return g.length > 1 && Math.max(...g) !== Math.min(...g);
       });
@@ -565,9 +581,13 @@
     const g = Math.max(1, t.gamesPerTeam || 1);
     let rounds = 1;
     for (const p of Algo.puljer(Object.values(teamMap()), S.schedule.banes)) {
-      const nB = Math.min(p.banes.length, Math.floor(p.teams.length / 2));
+      const nB = Algo.usableBanes(p.teams, p.banes.length, S.schedule.sameClass);
       if (nB < 1) continue;
-      rounds = Math.max(rounds, Math.ceil(Math.ceil((p.teams.length * g) / 2) / nB));
+      const groups = fairGroups(p.teams).filter((q) => q.teams.length >= 2);
+      const games = groups.reduce((sum, q) => sum + Math.ceil((q.teams.length * g) / 2), 0);
+      rounds = Math.max(rounds, Math.ceil(games / nB));
+      // En klasse kan ikke spille flere kamper samtidig enn den har par av lag.
+      for (const q of groups) rounds = Math.max(rounds, Math.ceil(Math.ceil((q.teams.length * g) / 2) / Math.floor(q.teams.length / 2)));
     }
     return rounds;
   }
@@ -600,7 +620,8 @@
     const teams = Object.values(teamMap());
     if (teams.length < 2) { toast('Det trengs minst to lag. Lag laginndeling eller legg til besøkende lag.'); return; }
     const pul = Algo.puljer(teams, S.schedule.banes);
-    const thin = pul.filter((p) => p.teams.length < 2);
+    const fair = fairGroups(teams);
+    const thin = fair.filter((p) => p.teams.length < 2);
     const target = gamesMode() ? Math.max(1, S.schedule.timing.gamesPerTeam || 1) : null;
     const build = () => {
       S.schedule.matches = Algo.makeSchedule(teams, S.schedule.banes, matchSlots().map((s) => s.id),
@@ -609,7 +630,7 @@
     // Alle i puljen har fått så mange kamper som valgt (eller én mindre når regnestykket ikke går opp).
     const targetMet = () => {
       const c = matchCounts();
-      return pul.every((p) => {
+      return fair.every((p) => {
         const n = p.teams.length;
         if (n < 2) return true;
         const odd = (n * target) % 2 === 1;
@@ -629,29 +650,29 @@
       }
     }
     const counts = matchCounts();
-    const uneven = pul.filter((p) => {
+    const uneven = fair.filter((p) => {
       const g = p.teams.map((t) => counts[t.id] || 0);
       return g.length && Math.max(...g) !== Math.min(...g);
     });
-    const usable = pul.find((p) => p.teams.length >= 2 && p.banes.length > Math.floor(p.teams.length / 2));
+    const usable = S.schedule.sameClass ? null : pul.find((p) => p.teams.length >= 2 && p.banes.length > Math.floor(p.teams.length / 2));
     const extra = added ? ` Det trengtes ${added} ekstra kamprunde${added === 1 ? '' : 'r'} for å få plass til pauser.` : '';
     const banesNote = usable ? ` Med ${usable.teams.length} lag kan bare ${Math.floor(usable.teams.length / 2)} baner brukes samtidig.` : '';
     if (thin.length) {
       toast(`Obs: ${thin.map((p) => p.label || 'baner uten klasse').join(', ')} har færre enn to lag. Sjekk klassene.`);
-    } else if (gamesMode() && S.schedule.equalGames && pul.some((p) => (p.teams.length * (S.schedule.timing.gamesPerTeam || 1)) % 2)) {
-      const p = pul.find((q) => (q.teams.length * (S.schedule.timing.gamesPerTeam || 1)) % 2);
+    } else if (gamesMode() && S.schedule.equalGames && fair.some((p) => (p.teams.length * (S.schedule.timing.gamesPerTeam || 1)) % 2)) {
+      const p = fair.find((q) => (q.teams.length * (S.schedule.timing.gamesPerTeam || 1)) % 2);
       const g = S.schedule.timing.gamesPerTeam || 1;
       toast(`${p.teams.length} lag kan ikke spille ${g} kamper hver, fordi hver kamp har to lag. ` +
         `Alle får derfor ${g - 1}. Velg ${g + 1} kamper, eller skru av «like mange kamper» så får ett lag én kamp mindre.`);
     } else if (S.schedule.equalGames && uneven.length) {
       toast('Klarte ikke å gi alle like mange kamper med disse reglene og rundene. Prøv flere kamprunder, eller velg «antall kamper per lag».' + banesNote);
     } else if (S.schedule.equalGames) {
-      const g = pul.map((p) => counts[(p.teams[0] || {}).id] || 0);
+      const g = fair.map((p) => counts[(p.teams[0] || {}).id] || 0);
       let empty = 0;
       for (const slot of matchSlots()) {
         for (const p of pul) {
           if (p.teams.length < 2) continue;
-          const usableBanes = Math.min(p.banes.length, Math.floor(p.teams.length / 2));
+          const usableBanes = Algo.usableBanes(p.teams, p.banes.length, S.schedule.sameClass);
           empty += usableBanes - p.banes.filter((b) => (S.schedule.matches[slot.id] || {})[b]).length;
         }
       }
