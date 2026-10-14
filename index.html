@@ -14,7 +14,7 @@
   <meta name="theme-color" content="#2F4858">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
   <script>try { var t = localStorage.getItem('aktivitetsdag.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
-  <link rel="stylesheet" href="css/style.css?v=2026-10-14b">
+  <link rel="stylesheet" href="css/style.css?v=2026-10-14c">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -45,8 +45,7 @@
     </nav>
     <div class="top-actions">
       <button class="btn settings-btn" id="btn-settings" data-goto="innstillinger" title="Innstillinger og brukermanual" aria-label="Innstillinger og brukermanual"><svg class="i" aria-hidden="true"><use href="#i-gear"/></svg></button>
-      <button class="btn" id="btn-export" title="Skriv ut eller velg hvilke sider som skal med"><svg class="i" aria-hidden="true"><use href="#i-print"/></svg> <span>Skriv ut</span></button>
-      <button class="btn primary" id="btn-pdf-download" title="Last ned siden du står på som PDF (fra «Dagen»: alle sidene)"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg> <span>Lagre som PDF</span></button>
+      <button class="btn primary" id="btn-export" title="Last ned som PDF eller skriv ut, og velg hvilke sider som skal være med"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg> <span>PDF</span></button>
     </div>
   </header>
 
@@ -109,8 +108,8 @@
       <div class="cols">
         <div class="card">
           <h2>Spillere <span class="badge" id="player-count"></span></h2>
-          <p class="muted">Lim inn en liste med navn (ett per linje), eller legg til én og én. Fjern haken for de som ikke er med denne dagen. Har dere flere klasser samme dag (f.eks. micro med U6, U7 og U8), skriver du klassen før du limer inn listen for hver klasse. Da lages lagene klasse for klasse.</p>
-          <textarea id="player-paste" rows="3" placeholder="Ola Nordmann&#10;Kari Nordmann&#10;…"></textarea>
+          <p class="muted">Lim inn en liste med navn (ett per linje), eller legg til én og én. Står foresatte i kolonnen ved siden av i regnearket, eller etter et komma («Ola Nordmann, Kari Nordmann»), kommer de med. Fjern haken for de som ikke er med denne dagen. Har dere flere klasser samme dag (f.eks. micro med U6, U7 og U8), skriver du klassen før du limer inn listen for hver klasse. Da lages lagene klasse for klasse.</p>
+          <textarea id="player-paste" rows="3" placeholder="Ola Nordmann&#10;Emma Hansen, Lise Hansen&#10;…"></textarea>
           <div class="row">
             <label class="inline">Klasse <span class="muted">(valgfritt)</span> <input id="player-class" list="class-list" class="short" placeholder="U7"></label>
             <button class="btn" id="btn-add-players">Legg til navn</button>
@@ -365,7 +364,7 @@
             <li><b>Laginndeling:</b> lim inn spillerne og trykk «Lag laginndeling».</li>
             <li><b>Kampoppsett:</b> legg til besøkende lag, baner og tider, og trykk «Lag kampoppsett».</li>
             <li><b>Oppgaver</b> og <b>Dommere:</b> fordel automatisk og juster for hånd.</li>
-            <li><b>Lagre som PDF</b> og del planen.</li>
+            <li>Trykk <b>PDF</b> øverst og del planen.</li>
             <li>Etter dagen: lagre dagen i historikken og lagre til fil.</li>
           </ol>
         </div>
@@ -435,15 +434,30 @@
   <!-- Eksport-dialog -->
   <dialog id="export-dialog">
     <form method="dialog">
-      <h2>Skriv ut</h2>
-      <p class="muted">Velg hva som skal være med, og trykk «Skriv ut». I utskriftsvinduet kan du også velge <b>Lagre som PDF</b>. Vil du bare laste ned alt som én PDF, bruker du knappen «Lagre som PDF» i stedet.</p>
+      <h2>PDF og utskrift</h2>
+      <p class="muted">Velg hva som skal være med. Hver del kommer på sin egen side.</p>
       <label class="check"><input type="checkbox" name="lag" checked> Laginndeling</label>
       <label class="check"><input type="checkbox" name="kamp" checked> Kampoppsett</label>
       <label class="check"><input type="checkbox" name="oppgaver" checked> Oppgavefordeling</label>
       <label class="check"><input type="checkbox" name="dommer" checked> Dommeroppsett</label>
+      <p class="muted"><b>Last ned PDF</b> lagrer en fil i Nedlastinger, klar til å sende på e-post eller Spond. <b>Skriv ut</b> åpner utskriftsvinduet.</p>
       <div class="row end">
         <button class="btn" value="cancel">Avbryt</button>
-        <button class="btn primary" value="ok">Skriv ut</button>
+        <button class="btn" value="print"><svg class="i" aria-hidden="true"><use href="#i-print"/></svg> Skriv ut</button>
+        <button class="btn primary" value="download" autofocus><svg class="i" aria-hidden="true"><use href="#i-download"/></svg> Last ned PDF</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Ny aktivitetsdag -->
+  <dialog id="newday-dialog">
+    <form method="dialog">
+      <h2>Start ny aktivitetsdag</h2>
+      <p class="muted">Laginndeling, kampoppsett, oppgaver og dommeroppsett tømmes. Spillere, lag, baner og dommere beholdes.</p>
+      <label class="check" id="newday-archive-row"><input type="checkbox" id="newday-archive" checked> <span>Lagre dagen i historikken først <span class="muted">(anbefalt, gir nye lagkamerater og sparer de som hadde oppgaver)</span></span></label>
+      <div class="row end">
+        <button class="btn" value="cancel">Avbryt</button>
+        <button class="btn primary" value="ok">Start ny aktivitetsdag</button>
       </div>
     </form>
   </dialog>
@@ -451,11 +465,11 @@
   <div id="print-area" class="p-doc"></div>
   <div id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/state.js?v=2026-10-14b"></script>
-  <script src="js/algorithms.js?v=2026-10-14b"></script>
-  <script src="js/print.js?v=2026-10-14b"></script>
-  <script src="js/app.js?v=2026-10-14b"></script>
-  <script src="js/intro.js?v=2026-10-14b"></script>
+  <script src="js/state.js?v=2026-10-14c"></script>
+  <script src="js/algorithms.js?v=2026-10-14c"></script>
+  <script src="js/print.js?v=2026-10-14c"></script>
+  <script src="js/app.js?v=2026-10-14c"></script>
+  <script src="js/intro.js?v=2026-10-14c"></script>
   <script data-goatcounter="https://aktivitetsdag.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

@@ -21,7 +21,7 @@ Under Innstillinger ligger også brukermanualen (`docs/brukermanual.pdf`), valg 
 2. **Laginndeling**: Lim inn spillerlisten, velg antall per lag og trykk «Lag laginndeling». Flytt spillere manuelt hvis du vil.
 3. **Kampoppsett**: Legg til besøkende lag, sett opp baner og tider, og trykk «Lag kampoppsett». Du kan endre hver kamp i tabellen etterpå.
 4. **Oppgaver** og **Dommere**: Trykk på knappene for å fordele automatisk, og juster etter behov.
-5. Trykk **PDF** øverst til høyre, velg hva som skal være med, og velg «Lagre som PDF» i utskriftsvinduet.
+5. Trykk **PDF** øverst til høyre, velg hva som skal være med, og trykk «Last ned PDF» (eller «Skriv ut»).
 6. Etter aktivitetsdagen: gå til **Dagen**, trykk «Lagre dagen i historikken» og så «Start ny aktivitetsdag». Da roterer lagene neste gang.
 
 ## Publisere siden gratis med GitHub Pages
