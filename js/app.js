@@ -329,7 +329,7 @@
         <td><input type="checkbox" data-path="players.${i}.present"${p.present ? ' checked' : ''}></td>
         <td><input data-path="players.${i}.name" value="${esc(p.name)}" aria-label="Navn"></td>
         <td data-label="Klasse"><input data-path="players.${i}.klasse" value="${esc(p.klasse || '')}" placeholder="${esc(S.event.ageGroup || '')}" list="class-list" class="short" aria-label="Klasse"></td>
-        <td data-label="Foresatte"><input data-path="players.${i}.parents" value="${esc(p.parents || '')}" placeholder="Navn på foresatte" aria-label="Foresatte"></td>
+        <td data-label="Foresatte"><input data-path="players.${i}.parents" value="${esc(p.parents || '')}"${i === 0 ? ' placeholder="Navn på foresatte"' : ''} aria-label="Foresatte"></td>
         <td><button class="icon" data-action="del-player" data-i="${i}" title="Fjern" aria-label="Fjern ${esc(p.name)}">✕</button></td>
       </tr>`).join('') || '<tr><td colspan="5" class="muted">Ingen spillere ennå.</td></tr>';
   }
@@ -575,10 +575,10 @@
         sels.push(`<select data-path="tasks.${i}.assigned.${j}"${out ? ' class="conflict"' : ''}>${options(opts, id, '–')}</select>`);
       }
       return `<tr>
-        <td><input data-path="tasks.${i}.name" value="${esc(t.name)}"></td>
-        <td><input data-path="tasks.${i}.time" value="${esc(t.time)}" placeholder="09:00-11:00" class="short"></td>
-        <td><input type="number" min="0" max="20" data-type="number" data-path="tasks.${i}.needed" value="${t.needed}" class="tiny"></td>
-        <td class="assign">${sels.join('')}</td>
+        <td><input data-path="tasks.${i}.name" value="${esc(t.name)}" aria-label="Oppgave"></td>
+        <td data-label="Tidspunkt"><input data-path="tasks.${i}.time" value="${esc(t.time)}" placeholder="Valgfritt" class="timefield" aria-label="Tidspunkt"></td>
+        <td data-label="Antall"><input type="number" min="0" max="20" data-type="number" aria-label="Antall" data-path="tasks.${i}.needed" value="${t.needed}" class="tiny"></td>
+        <td class="assign" data-label="Ansvarlige">${sels.join('')}</td>
         <td><button class="icon" data-action="del-task" data-i="${i}" title="Fjern">✕</button></td>
       </tr>`;
     }).join('') || '<tr><td colspan="5" class="muted">Ingen oppgaver.</td></tr>';
@@ -664,20 +664,44 @@
 
   // ---------- Handlinger ----------
 
+  // Én spiller per linje. Er listen kopiert fra et regneark med foresatte i neste kolonne (tabulator),
+  // eller skrevet som «Ola Nordmann, Kari Nordmann», blir resten av linjen foresatte.
+  function parsePlayerLine(line) {
+    let parts = line.split('\t').map((x) => x.trim()).filter(Boolean);
+    if (parts.length < 2 && line.includes(',')) {
+      const [first, ...rest] = line.split(',').map((x) => x.trim());
+      // «Nordmann, Ola» er etternavn først og ikke en foresatt: da står det bare ett ord etter kommaet.
+      if (rest.length && rest.join(' ').includes(' ')) parts = [first, ...rest.filter(Boolean)];
+    }
+    if (parts.length < 2) return { name: line.trim(), parents: '' };
+    return { name: parts[0], parents: parts.slice(1).join(', ') };
+  }
+
   function addPlayers() {
-    const names = $('#player-paste').value.split(/\n|;/).map((s) => s.trim()).filter(Boolean);
-    if (!names.length) { toast('Skriv inn minst ett navn.'); return; }
+    const lines = $('#player-paste').value.split(/\n|;/).map((s) => s.trim()).filter(Boolean);
+    if (!lines.length) { toast('Skriv inn minst ett navn.'); return; }
     const klasse = $('#player-class').value.trim();
-    const existing = new Set(S.players.map((p) => p.name.toLowerCase()));
-    let added = 0;
-    for (const name of names) {
-      if (existing.has(name.toLowerCase())) continue;
-      S.players.push({ id: Store.uid('p'), name, present: true, parents: '', klasse });
-      existing.add(name.toLowerCase());
+    const byName = new Map(S.players.map((p) => [p.name.toLowerCase(), p]));
+    let added = 0, skipped = 0, filled = 0;
+    for (const line of lines) {
+      const { name, parents } = parsePlayerLine(line);
+      if (!name) continue;
+      const old = byName.get(name.toLowerCase());
+      if (old) {
+        // Finnes spilleren fra før, fylles bare foresatte inn hvis feltet er tomt.
+        if (parents && !old.parents) { old.parents = parents; filled++; } else skipped++;
+        continue;
+      }
+      const p = { id: Store.uid('p'), name, present: true, parents, klasse };
+      S.players.push(p);
+      byName.set(name.toLowerCase(), p);
       added++;
     }
     $('#player-paste').value = '';
-    toast(`${added} spiller${added === 1 ? '' : 'e'} lagt til.`);
+    const parts = added || (!filled && !skipped) ? [`${added} spiller${added === 1 ? '' : 'e'} lagt til.`] : [];
+    if (filled) parts.push(`Foresatte fylt inn for ${filled} som fantes fra før.`);
+    if (skipped) parts.push(`${skipped} fantes fra før og ble hoppet over.`);
+    toast(parts.join(' '));
   }
 
   function makeTeams() {
@@ -863,10 +887,11 @@
     note('oppgaver', need > fam.length ? `Oppgaver fordelt. Noen familier har fått mer enn én oppgave (${need} plasser, ${fam.length} familier).` : 'Oppgaver fordelt.', 'Oppgaver fordelt.');
   }
 
-  function archiveDay() {
+  // quiet: brukes når dagen lagres fra «Start ny aktivitetsdag». Da byttes en lagret dag med samme dato ut uten å spørre.
+  function archiveDay(quiet) {
     const teams = currentTeams();
     const groups = teams.map((t) => t.players.map((p) => p.id)).filter((g) => g.length);
-    if (!groups.length) { toast('Lag en laginndeling før du lagrer dagen.'); return; }
+    if (!groups.length) { if (!quiet) toast('Lag en laginndeling før du lagrer dagen.'); return false; }
     const entry = {
       id: Store.uid('h'),
       date: S.event.date,
@@ -876,17 +901,41 @@
     };
     const i = S.history.findIndex((h) => h.date === entry.date);
     if (i >= 0) {
-      if (!confirm('Det finnes allerede en dag med denne datoen i historikken. Vil du erstatte den?')) return;
+      if (!quiet && !confirm('Det finnes allerede en dag med denne datoen i historikken. Vil du erstatte den?')) return false;
       S.history[i] = entry;
     } else {
       S.history.push(entry);
       S.history.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
     }
-    toast('Dagen er lagret i historikken.');
+    if (!quiet) toast('Dagen er lagret i historikken.');
+    return true;
   }
 
-  function newDay() {
-    if (!confirm('Starte en ny aktivitetsdag? Laginndeling, kampoppsett, oppgaver og dommeroppsett tømmes. Spillere, lag, baner og dommere beholdes. Husk å lagre dagen i historikken først hvis du vil ha rullering.')) return;
+  // Er dagen allerede lagret i historikken, med samme lag som nå?
+  function dayArchived() {
+    const h = S.history.find((x) => x.date === S.event.date);
+    if (!h) return false;
+    const now = currentTeams().map((t) => t.players.map((p) => p.id).sort().join()).filter(Boolean).sort().join('|');
+    const saved = (h.groups || []).map((g) => [...g].sort().join()).sort().join('|');
+    return now === saved;
+  }
+
+  // «Start ny aktivitetsdag» åpner en dialog. Har dagen lag som ikke er lagret i historikken,
+  // er «Lagre dagen i historikken først» huket av, så rulleringen ikke går tapt.
+  function askNewDay() {
+    const dlg = $('#newday-dialog');
+    const hasTeams = currentTeams().some((t) => t.players.length);
+    const show = hasTeams && !dayArchived();
+    $('#newday-archive-row').hidden = !show;
+    $('#newday-archive').checked = show;
+    dlg.returnValue = '';
+    if (typeof dlg.showModal === 'function') dlg.showModal();
+    else if (confirm('Starte en ny aktivitetsdag? Laginndeling, kampoppsett, oppgaver og dommeroppsett tømmes.')) startNewDay(show);
+  }
+
+  function startNewDay(archive) {
+    const before = JSON.stringify(S);
+    const archived = archive && archiveDay(true);
     S.teams.assignment = {};
     S.schedule.matches = {};
     S.refs.assignment = {};
@@ -897,7 +946,9 @@
     S.event.date = d.toISOString().slice(0, 10);
     $('#team-repeat-info').textContent = '';
     notes = {};
-    toast('Klar for ny aktivitetsdag.');
+    Store.save();
+    renderAll();
+    offerUndo(before, archived ? 'Dagen er lagret i historikken, og du er klar for en ny.' : 'Klar for ny aktivitetsdag.');
   }
 
   function saveFile() {
@@ -980,8 +1031,8 @@
       $('#ref-paste').value = '';
     },
     'btn-make-refs': makeRefs,
-    'btn-archive': archiveDay,
-    'btn-newday': newDay,
+    'btn-archive': () => archiveDay(),
+    'btn-newday': askNewDay,
     'btn-save-file': saveFile,
     'btn-reset': () => {
       if (confirm('Er du sikker? Alt du har lagt inn slettes fra denne nettleseren.')) {
@@ -991,6 +1042,18 @@
       }
     }
   };
+
+  // Lager en ekte PDF-fil som havner i Nedlastinger.
+  let pdfBusy = false;
+  function downloadPdf(sections) {
+    if (pdfBusy) return;
+    pdfBusy = true;
+    toast('Lager PDF …');
+    Print.download(sections)
+      .then(() => toast(`PDF-en er lagret som «${Print.fileName(sections)}» i Nedlastinger.`))
+      .catch(() => toast('Klarte ikke å lage PDF-en. Prøv «Skriv ut» og velg «Lagre som PDF» i utskriftsvinduet.'))
+      .finally(() => { pdfBusy = false; });
+  }
 
   // ---------- Faner ----------
 
@@ -1027,22 +1090,6 @@
         e.preventDefault();
         showTab(tab.dataset.tab || tab.dataset.goto);
         window.scrollTo(0, 0);
-        return;
-      }
-
-      const dl = e.target.closest('#btn-pdf-download, [data-pdf-download]');
-      if (dl) {
-        if (dl.disabled) return;
-        dl.disabled = true;
-        // Knappen øverst lagrer siden man står på. Fra «Dagen» (og «Regler og råd») lagres alle sidene i én PDF.
-        const all = ['lag', 'kamp', 'oppgaver', 'dommer'];
-        const tab = (document.querySelector('.tab.active') || {}).dataset;
-        const sections = dl.id === 'btn-pdf-download' && tab && all.includes(tab.tab) ? [tab.tab] : all;
-        toast('Lager PDF …');
-        Print.download(sections)
-          .then(() => toast(`PDF-en er lagret som «${Print.fileName(sections)}» i Nedlastinger.`))
-          .catch(() => toast('Klarte ikke å lage PDF-en. Prøv «Skriv ut» og velg «Lagre som PDF» der.'))
-          .finally(() => { dl.disabled = false; });
         return;
       }
 
@@ -1107,15 +1154,28 @@
       renderAll(full ? null : el.closest('table') || el);
     });
 
+    // PDF-knappen øverst: velg hvilke deler som skal med, og om de skal lastes ned eller skrives ut.
+    // Står du på en av de fire sidene, er bare den valgt fra start. Fra «Dagen» er alle valgt.
+    const all = ['lag', 'kamp', 'oppgaver', 'dommer'];
     const dlg = $('#export-dialog');
     $('#btn-export').addEventListener('click', () => {
+      const tab = ($('.tab.active') || {}).dataset || {};
+      const only = all.includes(tab.tab) ? tab.tab : null;
+      all.forEach((n) => { dlg.querySelector(`[name=${n}]`).checked = !only || n === only; });
+      dlg.returnValue = ''; // Esc lukker uten å endre returnValue, så den må nullstilles
       if (typeof dlg.showModal === 'function') dlg.showModal();
-      else Print.print(['lag', 'kamp', 'oppgaver', 'dommer']);
+      else downloadPdf(all);
     });
     dlg.addEventListener('close', () => {
-      if (dlg.returnValue !== 'ok') return;
-      const chosen = ['lag', 'kamp', 'oppgaver', 'dommer'].filter((n) => dlg.querySelector(`[name=${n}]`).checked);
-      if (chosen.length) Print.print(chosen);
+      const chosen = all.filter((n) => dlg.querySelector(`[name=${n}]`).checked);
+      if (!chosen.length || dlg.returnValue === 'cancel' || !dlg.returnValue) return;
+      if (dlg.returnValue === 'print') Print.print(chosen);
+      if (dlg.returnValue === 'download') downloadPdf(chosen);
+    });
+
+    const nd = $('#newday-dialog');
+    nd.addEventListener('close', () => {
+      if (nd.returnValue === 'ok') startNewDay(!$('#newday-archive-row').hidden && $('#newday-archive').checked);
     });
 
     $$('input[name=theme]').forEach((r) => {

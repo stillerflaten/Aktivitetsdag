@@ -33,7 +33,7 @@
     --muted: #A3ADB2;
     --line: #2F404B;
     --field: #24343E;
-    --accent: #C9D6DC;
+    --accent: #E3A587;       /* terrakotta fra logoen, så hovedknappene ikke ser deaktivert ut */
     --accent-text: #172229;
     --accent-soft: #263A45;
     --highlight: #E3A587;
@@ -51,7 +51,7 @@
   --muted: #A3ADB2;
   --line: #2F404B;
   --field: #24343E;
-  --accent: #C9D6DC;
+  --accent: #E3A587;
   --accent-text: #172229;
   --accent-soft: #263A45;
   --highlight: #E3A587;
@@ -123,6 +123,7 @@ a { color: var(--highlight); text-underline-offset: 2px; }
   .tabs { order: 3; flex-basis: 100%; margin: 0 -8px; }
   .top-actions { margin-left: auto; }
   .top-actions .btn span { display: none; }
+  .top-actions #btn-export span { display: inline; }
   .top-actions .btn { padding: 8px 11px; }
 }
 
@@ -171,6 +172,8 @@ input[type=checkbox] { width: 17px; height: 17px; flex: none; accent-color: var(
 input[type=color] { width: 42px; height: 32px; padding: 2px; }
 input.short { max-width: 110px; }
 input.tiny { max-width: 64px; }
+input.timefield { width: 125px; }
+::placeholder { color: var(--muted); opacity: .6; }
 textarea { resize: vertical; }
 
 .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
@@ -349,6 +352,18 @@ label.inline input { width: 90px; margin: 0; }
 .app-card { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; color: inherit; text-decoration: none; font-size: .9rem; }
 .app-card:hover { border-color: var(--accent); }
 
+/* Store nok trykkflater på berøringsskjerm (Apple anbefaler minst 44 px) */
+@media (pointer: coarse) {
+  .btn { min-height: 44px; }
+  .topbar .btn { min-width: 44px; justify-content: center; }
+  .tab { padding-top: 11px; padding-bottom: 11px; }
+  .icon { min-width: 44px; min-height: 44px; }
+  input[type=checkbox] { width: 22px; height: 22px; }
+  label.check { min-height: 44px; margin: 2px 0; }
+  input, select { min-height: 42px; }
+  table.grid select, table.grid td.time input, .team-card li select { min-height: 38px; }
+}
+
 /* Rull ikke resultatet inn under den faste toppmenyen */
 .card { scroll-margin-top: 76px; }
 @media (max-width: 700px) { .card { scroll-margin-top: 112px; } }
@@ -396,6 +411,21 @@ label.inline input { width: 90px; margin: 0; }
   #schedule-table tr.break td[colspan] { grid-column: 1 / -1; }
   #schedule-table td[colspan]:not(.muted) { grid-column: 1 / -1; }
   #schedule-table td.muted { grid-column: 1 / -1; }
+
+  /* Oppgave: navn, antall og ✕ øverst, tidspunkt og ansvarlige under */
+  #task-table thead { display: none; }
+  #task-table tbody { display: block; }
+  #task-table tr { display: grid; grid-template-columns: 1fr 70px 44px; gap: 6px 8px; align-items: end; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  #task-table td { display: block; padding: 0; min-width: 0; }
+  #task-table td:nth-child(1) { grid-area: 1 / 1; }
+  #task-table td:nth-child(2) { grid-area: 2 / 1 / 3 / -1; }
+  #task-table td:nth-child(3) { grid-area: 1 / 2; }
+  #task-table td:nth-child(4) { grid-area: 3 / 1 / 4 / -1; display: flex; }
+  #task-table td:nth-child(5) { grid-area: 1 / 3; align-self: center; }
+  #task-table td[colspan] { grid-column: 1 / -1; }
+  #task-table td.assign::before { flex-basis: 100%; }
+  #task-table input.timefield, #task-table input.tiny { width: 100%; max-width: none; }
+  #task-table .icon { min-width: 40px; min-height: 40px; }
 }
 
 /* Velkomstanimasjon med baller (js/intro.js) */
