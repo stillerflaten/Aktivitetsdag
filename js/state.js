@@ -69,6 +69,7 @@
         avoidSameClub: true,
         avoidBackToBack: true,
         avoidThreeInRow: true,
+        avoidRematch: true, // to lag møtes ikke to ganger (når det går opp)
         sameClass: false, // lag møter bare egen klasse, men alle banene deles
         equalGames: false
       },
