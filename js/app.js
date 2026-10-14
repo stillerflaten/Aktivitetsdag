@@ -6,12 +6,69 @@
 
   // ---------- Hjelpefunksjoner ----------
 
-  function toast(msg) {
+  // Kort melding nederst på skjermen. Med «undo» får meldingen en Angre-knapp.
+  function toast(msg, undo) {
     const t = $('#toast');
-    t.textContent = msg;
+    t.innerHTML = `<span>${esc(msg)}</span>` + (undo ? '<button type="button" class="toast-undo">Angre</button>' : '');
+    t.classList.toggle('has-undo', !!undo);
+    toast.undo = undo || null;
+    toast.last = msg;
     t.classList.add('show');
     clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => t.classList.remove('show'), Math.max(3500, msg.length * 60));
+    toast.timer = setTimeout(() => { t.classList.remove('show'); toast.undo = null; }, Math.max(undo ? 7000 : 3500, msg.length * 60));
+  }
+
+  // Beskjeder om resultatet som skal bli stående over oppsettet (ikke bare vises et øyeblikk nederst).
+  // De lagres ikke, og forsvinner når siden lastes på nytt eller resultatet lages på nytt.
+  let notes = {};
+  function note(page, msg, done) {
+    const rest = msg.startsWith(done) ? msg.slice(done.length).trim() : msg;
+    notes[page] = rest;
+    toast(!rest ? done : msg.startsWith(done) ? done + ' Se merknaden over resultatet.' : 'Se merknaden over resultatet.');
+  }
+  function renderNotes() {
+    for (const page of ['kamp', 'dommer', 'oppgaver']) $('#note-' + page).textContent = notes[page] || '';
+  }
+
+  // ---------- Angre ----------
+  // Før noe slettes eller lages på nytt, tas det vare på en kopi av alt. «Angre» legger kopien tilbake.
+
+  function offerUndo(before, msg) {
+    if (JSON.stringify(S) === before) return;
+    toast(msg, () => {
+      Store.replace(JSON.parse(before));
+      $('#team-repeat-info').textContent = '';
+      notes = {};
+      renderAll();
+      toast('Angret.');
+    });
+  }
+
+  // Meldingen som vises med Angre når handlingen ikke selv har sagt noe.
+  const undoMsg = {
+    'del-player': (i) => `${(S.players[i] || {}).name || 'Spilleren'} er fjernet.`,
+    'del-guest': (i) => `${(S.schedule.guests[i] || {}).name || 'Laget'} er fjernet.`,
+    'del-bane': (i) => `${(S.schedule.banes[i] || {}).name || 'Banen'} er fjernet.`,
+    'del-slot': (i) => ((S.schedule.slots[i] || {}).type === 'break' ? 'Pausen er fjernet.' : 'Kamprunden er fjernet.'),
+    'del-task': (i) => `${(S.tasks[i] || {}).name || 'Oppgaven'} er fjernet.`,
+    'del-ref': (i) => `${(S.refs.people[i] || {}).name || 'Dommeren'} er fjernet.`,
+    'btn-make-teams': () => 'Ny laginndeling laget.',
+    'btn-make-schedule': () => 'Nytt kampoppsett laget.',
+    'btn-make-refs': () => 'Nytt dommeroppsett laget.',
+    'btn-fill-tasks': () => 'Oppgaver fordelt.',
+    'btn-clear-tasks': () => 'Fordelingen er tømt.',
+    'btn-gen-times': () => 'Tidspunktene er laget på nytt.'
+  };
+
+  // Ruller til resultatet etter «Lag …», men bare hvis det ikke allerede synes på skjermen.
+  function revealResult(sel) {
+    const el = $(sel);
+    if (!el) return;
+    const card = el.closest('.card') || el;
+    const r = card.getBoundingClientRect();
+    if (r.top >= 0 && r.top < innerHeight * 0.6) return;
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    card.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
   }
 
   function getPath(obj, path) {
@@ -116,19 +173,40 @@
     return label.trim();
   }
 
+  // Kort navn i kampoppsettet: klubben tas bare med når lagnavnet ikke allerede sier hvilken klubb det er.
+  // «Sjøvik» fra Sjøvik HK blir «Sjøvik HK», og «Nordby 1» fra Nordby IL blir stående som det er.
+  function shortLabel(name, club) {
+    const n = (name || '').trim();
+    const c = (club || '').trim();
+    if (!c) return n;
+    const lc = c.toLowerCase(), ln = n.toLowerCase();
+    if (lc.includes(ln)) return c;
+    if (ln.includes(lc) || ln.split(/\s+/)[0] === lc.split(/\s+/)[0]) return n;
+    return c + ' ' + n;
+  }
+
   // Alle lag som er med i kampoppsettet, både egne og besøkende.
   function teamMap() {
-    const map = {};
+    const list = [];
     if (S.schedule.includeOwn && presentPlayers().length) {
-      for (const t of currentTeams()) {
-        map[t.id] = { id: t.id, label: teamLabel(t.name, S.event.club, t.klasse), club: S.event.club, klasse: t.klasse, color: t.color };
-      }
+      for (const t of currentTeams()) list.push({ id: t.id, name: t.name, club: S.event.club, klasse: t.klasse, color: t.color });
     }
     const colors = guestColors();
     for (const g of S.schedule.guests) {
       if (!g.name.trim()) continue;
-      map[g.id] = { id: g.id, label: teamLabel(g.name, g.club, g.klasse), club: g.club, klasse: g.klasse, color: colors[g.id] };
+      list.push({ id: g.id, name: g.name, club: g.club, klasse: g.klasse, color: colors[g.id] });
     }
+    // Klassen vises bare når lagene er fra ulike klasser (lag uten klasse teller ikke). Blir to navn like, brukes det fulle navnet.
+    const oneClass = new Set(list.map((t) => (t.klasse || '').trim().toLowerCase()).filter(Boolean)).size <= 1;
+    const short = list.map((t) => {
+      const l = shortLabel(t.name, t.club);
+      return oneClass || !t.klasse || l.toLowerCase().includes(t.klasse.toLowerCase()) ? l : l + ' ' + t.klasse;
+    });
+    const dup = (l) => short.filter((x) => x.toLowerCase() === l.toLowerCase()).length > 1;
+    const map = {};
+    list.forEach((t, i) => {
+      map[t.id] = { id: t.id, label: dup(short[i]) ? teamLabel(t.name, t.club, t.klasse) : short[i], club: t.club, klasse: t.klasse, color: t.color };
+    });
     return map;
   }
 
@@ -249,10 +327,10 @@
     $('#player-table tbody').innerHTML = S.players.map((p, i) => `
       <tr class="${p.present ? '' : 'absent'}">
         <td><input type="checkbox" data-path="players.${i}.present"${p.present ? ' checked' : ''}></td>
-        <td><input data-path="players.${i}.name" value="${esc(p.name)}"></td>
-        <td><input data-path="players.${i}.klasse" value="${esc(p.klasse || '')}" placeholder="${esc(S.event.ageGroup || '')}" list="class-list" class="short" aria-label="Klasse"></td>
-        <td><input data-path="players.${i}.parents" value="${esc(p.parents || '')}" placeholder="Navn på foresatte"></td>
-        <td><button class="icon" data-action="del-player" data-i="${i}" title="Fjern">✕</button></td>
+        <td><input data-path="players.${i}.name" value="${esc(p.name)}" aria-label="Navn"></td>
+        <td data-label="Klasse"><input data-path="players.${i}.klasse" value="${esc(p.klasse || '')}" placeholder="${esc(S.event.ageGroup || '')}" list="class-list" class="short" aria-label="Klasse"></td>
+        <td data-label="Foresatte"><input data-path="players.${i}.parents" value="${esc(p.parents || '')}" placeholder="Navn på foresatte" aria-label="Foresatte"></td>
+        <td><button class="icon" data-action="del-player" data-i="${i}" title="Fjern" aria-label="Fjern ${esc(p.name)}">✕</button></td>
       </tr>`).join('') || '<tr><td colspan="5" class="muted">Ingen spillere ennå.</td></tr>';
   }
 
@@ -316,9 +394,9 @@
     $('#guest-table tbody').innerHTML = S.schedule.guests.map((g, i) => `
       <tr>
         <td><input type="color" data-path="schedule.guests.${i}.color" value="${esc(colors[g.id])}" title="Lagfarge i kampoppsettet"></td>
-        <td><input data-path="schedule.guests.${i}.name" value="${esc(g.name)}" placeholder="Redwings"></td>
-        <td><input data-path="schedule.guests.${i}.club" value="${esc(g.club)}" placeholder="Nidaros" list="club-list"></td>
-        <td><input data-path="schedule.guests.${i}.klasse" value="${esc(g.klasse)}" placeholder="U9" list="class-list" class="short"></td>
+        <td><input data-path="schedule.guests.${i}.name" value="${esc(g.name)}" placeholder="Redwings" aria-label="Lagnavn"></td>
+        <td data-label="Klubb"><input data-path="schedule.guests.${i}.club" value="${esc(g.club)}" placeholder="Nidaros" list="club-list" aria-label="Klubb"></td>
+        <td data-label="Klasse"><input data-path="schedule.guests.${i}.klasse" value="${esc(g.klasse)}" placeholder="U9" list="class-list" class="short" aria-label="Klasse"></td>
         <td><button class="icon" data-action="del-guest" data-i="${i}" title="Fjern">✕</button></td>
       </tr>`).join('') || '<tr><td colspan="5" class="muted">Ingen besøkende lag ennå.</td></tr>';
     const clubs = [...new Set(S.schedule.guests.map((g) => g.club).filter(Boolean))];
@@ -399,7 +477,8 @@
         for (const side of [0, 1]) {
           const id = m[side] || '';
           const cls = [seen[id] > 1 ? 'conflict' : '', tm[id] ? 'tc' : ''].filter(Boolean).join(' ');
-          html += `<td class="${cls}"${seen[id] > 1 ? '' : teamStyle(tm[id])}><select data-path="schedule.matches.${slot.id}.${b.id}.${side}">${options(opts[b.id] || [], id)}</select></td>`;
+          // data-label viser banenavnet over kampen når tabellen vises som kort på mobil.
+          html += `<td class="${cls}" data-label="${side ? '' : esc(b.name)}"${seen[id] > 1 ? '' : teamStyle(tm[id])}><select data-path="schedule.matches.${slot.id}.${b.id}.${side}" aria-label="${esc(b.name)}, lag ${side + 1}">${options(opts[b.id] || [], id)}</select></td>`;
         }
       }
       html += `<td><button class="icon" data-action="del-slot" data-i="${i}" title="Fjern">✕</button></td></tr>`;
@@ -569,7 +648,8 @@
     ['#schedule-table', renderSchedule],
     ['#schedule-warn', renderScheduleWarn],
     ['#task-table', renderTasks],
-    ['#ref-table', renderRefs]
+    ['#ref-table', renderRefs],
+    ['#note-kamp', renderNotes]
   ];
 
   // Tegner alt på nytt, men lar være den tabellen brukeren skriver i akkurat nå.
@@ -670,6 +750,7 @@
     const fair = fairGroups(teams);
     const thin = fair.filter((p) => p.teams.length < 2);
     const target = gamesMode() ? Math.max(1, S.schedule.timing.gamesPerTeam || 1) : null;
+    const reportSchedule = (msg) => note('kamp', msg, 'Nytt kampoppsett laget.');
     const build = () => {
       S.schedule.matches = Algo.makeSchedule(teams, S.schedule.banes, matchSlots().map((s) => s.id),
         { ...S.schedule, targetGames: target });
@@ -705,14 +786,14 @@
     const extra = added ? ` Det trengtes ${added} ekstra kamprunde${added === 1 ? '' : 'r'} for å få plass til pauser.` : '';
     const banesNote = usable ? ` Med ${usable.teams.length} lag kan bare ${Math.floor(usable.teams.length / 2)} baner brukes samtidig.` : '';
     if (thin.length) {
-      toast(`Obs: ${thin.map((p) => p.label || 'baner uten klasse').join(', ')} har færre enn to lag. Sjekk klassene.`);
+      reportSchedule(`Obs: ${thin.map((p) => p.label || 'baner uten klasse').join(', ')} har færre enn to lag. Sjekk klassene.`);
     } else if (gamesMode() && S.schedule.equalGames && fair.some((p) => (p.teams.length * (S.schedule.timing.gamesPerTeam || 1)) % 2)) {
       const p = fair.find((q) => (q.teams.length * (S.schedule.timing.gamesPerTeam || 1)) % 2);
       const g = S.schedule.timing.gamesPerTeam || 1;
-      toast(`${p.teams.length} lag kan ikke spille ${g} kamper hver, fordi hver kamp har to lag. ` +
+      reportSchedule(`${p.teams.length} lag kan ikke spille ${g} kamper hver, fordi hver kamp har to lag. ` +
         `Alle får derfor ${g - 1}. Velg ${g + 1} kamper, eller skru av «like mange kamper» så får ett lag én kamp mindre.`);
     } else if (S.schedule.equalGames && uneven.length) {
-      toast('Klarte ikke å gi alle like mange kamper med disse reglene og rundene. Prøv flere kamprunder, eller velg «antall kamper per lag».' + banesNote);
+      reportSchedule('Klarte ikke å gi alle like mange kamper med disse reglene og rundene. Prøv flere kamprunder, eller velg «antall kamper per lag».' + banesNote);
     } else if (S.schedule.equalGames) {
       const g = fair.map((p) => counts[(p.teams[0] || {}).id] || 0);
       let empty = 0;
@@ -723,10 +804,10 @@
           empty += usableBanes - p.banes.filter((b) => (S.schedule.matches[slot.id] || {})[b]).length;
         }
       }
-      toast(`Nytt kampoppsett laget. Alle lag får ${[...new Set(g)].join('/')} kamper.` + extra +
+      reportSchedule(`Nytt kampoppsett laget. Alle lag får ${[...new Set(g)].join('/')} kamper.` + extra +
         (empty ? ` ${empty === 1 ? '1 baneplass står tom' : empty + ' baneplasser står tomme'} i løpet av dagen.` : '') + banesNote);
     } else {
-      toast('Nytt kampoppsett laget.' + extra + banesNote);
+      reportSchedule('Nytt kampoppsett laget.' + extra + banesNote);
     }
   }
 
@@ -762,11 +843,11 @@
       const groups = Algo.refGroups(S.refs.people, S.schedule.banes.map((b) => b.id), matchSlots().map((s) => s.id), S.schedule.matches);
       const per = Math.max(1, S.refs.perMatch || 1);
       const short = S.schedule.banes.filter((b) => groups[b.id] && groups[b.id].length < per);
-      toast(short.length
+      note('dommer', short.length
         ? `Nytt dommeroppsett laget, men det er for få dommere: ${short.map((b) => b.name).join(', ')} mangler dommer. Legg til flere, eller skru av «samme bane hele dagen».`
-        : 'Nytt dommeroppsett laget. Hver dommer holder seg på sin bane.');
+        : 'Nytt dommeroppsett laget. Hver dommer holder seg på sin bane.', 'Nytt dommeroppsett laget.');
     } else {
-      toast('Nytt dommeroppsett laget.');
+      note('dommer', 'Nytt dommeroppsett laget.', 'Nytt dommeroppsett laget.');
     }
   }
 
@@ -779,7 +860,7 @@
     const res = Algo.makeTasks(S.tasks, fam, historyTaskCounts());
     S.tasks.forEach((t, i) => { t.assigned = res[i]; });
     const need = S.tasks.reduce((s, t) => s + (t.needed || 0), 0);
-    toast(need > fam.length ? `Oppgaver fordelt. Noen familier har fått mer enn én (${need} plasser, ${fam.length} familier).` : 'Oppgaver fordelt.');
+    note('oppgaver', need > fam.length ? `Oppgaver fordelt. Noen familier har fått mer enn én oppgave (${need} plasser, ${fam.length} familier).` : 'Oppgaver fordelt.', 'Oppgaver fordelt.');
   }
 
   function archiveDay() {
@@ -815,6 +896,7 @@
     d.setDate(d.getDate() + 7);
     S.event.date = d.toISOString().slice(0, 10);
     $('#team-repeat-info').textContent = '';
+    notes = {};
     toast('Klar for ny aktivitetsdag.');
   }
 
@@ -835,6 +917,7 @@
         const data = JSON.parse(reader.result);
         if (!data || typeof data !== 'object' || !data.event) throw new Error('feil format');
         Store.replace(data);
+        notes = {};
         renderAll();
         toast('Filen er åpnet.');
       } catch (e) {
@@ -865,6 +948,20 @@
     }
   };
 
+  // Fantes det noe i den delen knappen lager på nytt?
+  function hadContent(id, old) {
+    const filled = (o) => Object.values(o || {}).some((v) => (v && typeof v === 'object' ? filled(v) : !!v));
+    switch (id) {
+      case 'btn-make-teams': return filled(old.teams.assignment);
+      case 'btn-make-schedule': return filled(old.schedule.matches);
+      case 'btn-make-refs': return filled(old.refs.assignment);
+      case 'btn-fill-tasks':
+      case 'btn-clear-tasks': return old.tasks.some((t) => t.assigned.some(Boolean));
+      case 'btn-gen-times': return old.schedule.slots.length > 0;
+      default: return false;
+    }
+  }
+
   const buttons = {
     'btn-add-players': addPlayers,
     'btn-make-teams': makeTeams,
@@ -889,6 +986,7 @@
     'btn-reset': () => {
       if (confirm('Er du sikker? Alt du har lagt inn slettes fra denne nettleseren.')) {
         Store.reset();
+        notes = {};
         $('#team-repeat-info').textContent = '';
       }
     }
@@ -951,19 +1049,35 @@
       const pr = e.target.closest('[data-print]');
       if (pr) { Print.print([pr.dataset.print]); return; }
 
+      if (e.target.closest('.toast-undo')) {
+        const undo = toast.undo;
+        if (undo) undo();
+        return;
+      }
+
       const act = e.target.closest('[data-action]');
       if (act && actions[act.dataset.action]) {
-        actions[act.dataset.action](Number(act.dataset.i));
+        const name = act.dataset.action, i = Number(act.dataset.i);
+        const before = JSON.stringify(S);
+        const msg = undoMsg[name] && undoMsg[name](i);
+        actions[name](i);
         Store.save();
         renderAll();
+        if (msg) offerUndo(before, msg);
         return;
       }
 
       const btn = e.target.closest('button[id]');
       if (btn && buttons[btn.id]) {
+        const before = JSON.stringify(S);
+        toast.last = null;
         buttons[btn.id]();
         Store.save();
         renderAll();
+        // Bare når noe som fantes fra før, ble endret (en tom laginndeling er ikke noe å angre).
+        if (undoMsg[btn.id] && hadContent(btn.id, JSON.parse(before))) offerUndo(before, toast.last || undoMsg[btn.id]());
+        const result = { 'btn-make-teams': '#team-result', 'btn-make-schedule': '#schedule-table', 'btn-make-refs': '#ref-schedule' }[btn.id];
+        if (result && JSON.stringify(S) !== before) revealResult(result);
       }
     });
 

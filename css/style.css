@@ -305,17 +305,24 @@ dialog::backdrop { background: rgba(23, 34, 41, .45); }
   position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%) translateY(30px);
   background: var(--ink-deep); color: var(--cream); padding: 11px 18px; border-radius: 10px;
   border-left: 4px solid var(--clay);
-  max-width: calc(100vw - 32px);
+  width: max-content; max-width: calc(100vw - 32px);
   box-shadow: 0 10px 30px rgba(23, 34, 41, .25);
   opacity: 0; pointer-events: none; transition: .25s;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.has-undo.show { pointer-events: auto; display: flex; align-items: center; gap: 14px; }
+.toast-undo {
+  font: inherit; font-weight: 700; color: var(--clay); background: none; border: 0; cursor: pointer;
+  padding: 6px 4px; margin: -6px -4px -6px 0; border-radius: 6px; white-space: nowrap;
+}
+.toast-undo:hover { text-decoration: underline; }
+.toast-undo:focus-visible { outline: 2px solid var(--clay); outline-offset: 2px; }
 
 /* Innstillinger */
 .steps { margin: 0; padding-left: 20px; }
 .steps li { margin-bottom: 4px; }
 .seg { display: inline-flex; background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 2px; margin: 4px 0 6px; }
-.seg label { cursor: pointer; }
+.seg label { cursor: pointer; position: relative; } /* holder de skjulte radioknappene inne i knappen, ellers blir siden for bred på mobil */
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
 .seg span { display: block; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: .92rem; color: var(--muted); }
 .seg input:checked + span { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(23, 34, 41, .15); }
@@ -341,6 +348,55 @@ label.inline input { width: 90px; margin: 0; }
 .app-ad img, .app-card img { border-radius: 22%; display: block; flex: none; }
 .app-card { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; color: inherit; text-decoration: none; font-size: .9rem; }
 .app-card:hover { border-color: var(--accent); }
+
+/* Rull ikke resultatet inn under den faste toppmenyen */
+.card { scroll-margin-top: 76px; }
+@media (max-width: 700px) { .card { scroll-margin-top: 112px; } }
+
+/* ---------- Tabeller som kort på mobil ----------
+   Spillerlisten, «Lag som deltar» og kampoppsettet har for mange felt per rad for en telefon.
+   Under 600 px blir hver rad et lite kort, og feltene får liten overskrift fra data-label. */
+@media (max-width: 600px) {
+  #player-table thead, #guest-table thead, #schedule-table thead { display: none; }
+  #player-table tbody, #guest-table tbody, #schedule-table tbody { display: block; }
+  #player-table tr, #guest-table tr, #schedule-table tr { display: grid; gap: 6px 8px; align-items: end; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  #player-table td, #guest-table td, #schedule-table td { display: block; padding: 0; min-width: 0; }
+  #player-table td[colspan], #guest-table td[colspan] { grid-column: 1 / -1; }
+  td[data-label]::before { content: attr(data-label); display: block; font-size: .75rem; font-weight: 600; color: var(--muted); margin-bottom: 3px; min-height: 1.2em; }
+  #player-table input.short, #guest-table input.short { max-width: none; }
+  #player-table .icon, #guest-table .icon, #schedule-table .icon { min-width: 40px; min-height: 40px; }
+
+  /* Spiller: hake, navn og ✕ øverst, klasse og foresatte under */
+  #player-table tr { grid-template-columns: 28px 1fr 2fr 40px; }
+  #player-table td:nth-child(1) { grid-area: 1 / 1; align-self: center; }
+  #player-table td:nth-child(2) { grid-area: 1 / 2 / 2 / 4; }
+  #player-table td:nth-child(3) { grid-area: 2 / 2; }
+  #player-table td:nth-child(4) { grid-area: 2 / 3; }
+  #player-table td:nth-child(5) { grid-area: 1 / 4; align-self: center; }
+
+  /* Besøkende lag: farge, lagnavn og ✕ øverst, klubb og klasse under */
+  #guest-table tr { grid-template-columns: 46px 2fr 1fr 40px; }
+  #guest-table td:nth-child(1) { grid-area: 1 / 1; align-self: center; }
+  #guest-table td:nth-child(2) { grid-area: 1 / 2 / 2 / 4; }
+  #guest-table td:nth-child(3) { grid-area: 2 / 1 / 3 / 3; }
+  #guest-table td:nth-child(4) { grid-area: 2 / 3; }
+  #guest-table td:nth-child(5) { grid-area: 1 / 4; align-self: center; }
+
+  /* Kampoppsett: én blokk per runde med tidspunktet øverst og én linje per bane */
+  #schedule-table { min-width: 0; }
+  #schedule-table tr { grid-template-columns: 1fr 1fr; align-items: stretch; }
+  #schedule-table td { border: 0; }
+  #schedule-table td.time { grid-column: 1; grid-row: 1; display: flex; gap: 6px; width: auto; }
+  #schedule-table td.time input + input { margin-top: 0; }
+  #schedule-table td:last-child { grid-column: 2; grid-row: 1; justify-self: end; }
+  #schedule-table td.tc, #schedule-table td.conflict { border-radius: 8px; padding: 4px 4px 4px 8px; }
+  #schedule-table td[data-label=""]::before { content: "\00a0"; }
+  #schedule-table tr.break { padding: 10px 8px; border-radius: 10px; margin: 6px 0; border-bottom: 0; background: var(--break); }
+  #schedule-table tr.break td { background: none; }
+  #schedule-table tr.break td[colspan] { grid-column: 1 / -1; }
+  #schedule-table td[colspan]:not(.muted) { grid-column: 1 / -1; }
+  #schedule-table td.muted { grid-column: 1 / -1; }
+}
 
 /* Velkomstanimasjon med baller (js/intro.js) */
 .ball-drop { position: fixed; inset: 0; z-index: 1000; pointer-events: none; overflow: hidden; }
