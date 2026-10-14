@@ -157,6 +157,10 @@
       }
       caps[k] = cap;
     }
+    // «Ikke møtes to ganger» er en fast regel så lenge det går: et lag kan møte hver motstander
+    // i klassen (puljen) én gang, så regelen holder når ingen skal ha flere kamper enn det.
+    const strict = {};
+    for (const k of Object.keys(size)) strict[k] = !!opts.avoidRematch && Math.min(caps[k], slotIds.length) <= size[k] - 1;
 
     let best = null;
     let bestScore = Infinity;
@@ -180,15 +184,18 @@
           const free = ids.filter((id) => !used.has(id) && games[id] < caps[cls[id]] && !tired(id));
           // Bare lag som har en motstander i samme klasse ledig, kan settes opp.
           const avail = free.filter((id) => free.some((o) => o !== id && cls[o] === cls[id]));
-          if (avail.length < 2) break;
+          // Med fast «ikke møtes to ganger» må laget ha en ledig motstander det ikke har møtt.
+          const fresh = (a, b) => !(strict[cls[a]] && pairs.get(pairKey(a, b)));
+          const pickable = avail.filter((id) => avail.some((o) => o !== id && cls[o] === cls[id] && fresh(id, o)));
+          if (pickable.length < 2) break;
           const rest = (id) => {
             if (last[id] !== si - 1) return 0;
             return (opts.avoidBackToBack ? 5 : 0) + (opts.avoidThreeInRow && streak[id] >= 2 ? 25 : 0);
           };
-          const a = argmin(avail, (id) => games[id] * 10 + rest(id) + Math.random() * 3);
-          const b = argmin(avail.filter((id) => id !== a && cls[id] === cls[a]), (id) =>
+          const a = argmin(pickable, (id) => games[id] * 10 + rest(id) + Math.random() * 3);
+          const b = argmin(avail.filter((id) => id !== a && cls[id] === cls[a] && fresh(a, id)), (id) =>
             games[id] * 10 + rest(id) +
-            (pairs.get(pairKey(a, id)) || 0) * 9 +
+            (pairs.get(pairKey(a, id)) || 0) * (opts.avoidRematch ? 30 : 9) +
             (opts.avoidSameClub && club[a] && club[a] === club[id] ? 7 : 0) +
             Math.random() * 3);
           if (!b) break;
@@ -215,7 +222,7 @@
         const g = ids.filter((id) => cls[id] === k).map((id) => games[id]);
         spread += Math.max(...g) - Math.min(...g);
       }
-      const score = spread * 100 + repeats * 12 +
+      const score = spread * 100 + repeats * (opts.avoidRematch ? 60 : 12) +
         (opts.avoidBackToBack ? backToBack * 6 : 0) + (opts.avoidThreeInRow ? threeInRow * 40 : 0) +
         (opts.avoidSameClub ? sameClub * 8 : 0);
       if (score < bestScore) { bestScore = score; best = result; }

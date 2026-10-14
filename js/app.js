@@ -433,6 +433,25 @@
       }
       if (tired.length) out.push(`${listNames(tired)} spiller tre kamper på rad`);
     }
+    if (S.schedule.avoidRematch) {
+      // Bare der det var mulig å unngå: ingen lag i gruppen har flere kamper enn det finnes motstandere.
+      const c = matchCounts();
+      const groupOf = {};
+      for (const p of fairGroups(Object.values(tm))) {
+        const ok = p.teams.every((t) => (c[t.id] || 0) <= p.teams.length - 1);
+        p.teams.forEach((t) => { groupOf[t.id] = ok; });
+      }
+      const met = {}, twice = [];
+      for (const s of slots) {
+        for (const m of Object.values(S.schedule.matches[s.id] || {})) {
+          if (!m || !m[0] || !m[1] || !tm[m[0]] || !tm[m[1]]) continue;
+          const k = [m[0], m[1]].sort().join('|');
+          met[k] = (met[k] || 0) + 1;
+          if (met[k] === 2 && groupOf[m[0]]) twice.push(`${tm[m[0]].label} og ${tm[m[1]].label}`);
+        }
+      }
+      if (twice.length) out.push(`${listNames(twice)} møtes mer enn én gang`);
+    }
     if (S.schedule.sameClass) {
       const cross = slots.some((s) => Object.values(S.schedule.matches[s.id] || {}).some((m) =>
         m && m[0] && m[1] && tm[m[0]] && tm[m[1]] && (tm[m[0]].klasse || '') !== (tm[m[1]].klasse || '')));

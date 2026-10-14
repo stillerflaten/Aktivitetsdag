@@ -14,7 +14,7 @@
   <meta name="theme-color" content="#2F4858">
   <!-- ?v= tvinger nettleseren til å hente nye filer etter en oppdatering. Endre verdien når CSS/JS endres. -->
   <script>try { var t = localStorage.getItem('aktivitetsdag.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
-  <link rel="stylesheet" href="css/style.css?v=2026-10-13f">
+  <link rel="stylesheet" href="css/style.css?v=2026-10-14a">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -212,6 +212,7 @@
           <label class="check"><input type="checkbox" data-bind="schedule.avoidSameClub"> Unngå kamper mellom lag fra samme klubb</label>
           <label class="check"><input type="checkbox" data-bind="schedule.avoidBackToBack"> Unngå at et lag spiller to kamper på rad</label>
           <label class="check"><input type="checkbox" data-bind="schedule.avoidThreeInRow"> Unngå at et lag spiller tre kamper på rad</label>
+          <label class="check"><input type="checkbox" data-bind="schedule.avoidRematch"> <span>Unngå at to lag møter hverandre to ganger <span class="muted">(går så lenge ingen lag har flere kamper enn det finnes motstandere)</span></span></label>
           <label class="check"><input type="checkbox" data-bind="schedule.equalGames"> Alle lag skal spille like mange kamper</label>
           <p class="muted">Går ikke regnestykket opp, står noen baner tomme i enkelte runder. Uten dette valget kan noen lag få én kamp mer enn andre.</p>
           <div class="row"><button class="btn primary" id="btn-make-schedule"><svg class="i" aria-hidden="true"><use href="#i-shuffle"/></svg> Lag kampoppsett</button></div>
@@ -447,11 +448,11 @@
   <div id="print-area" class="p-doc"></div>
   <div id="toast" role="status"></div>
 
-  <script src="js/state.js?v=2026-10-13f"></script>
-  <script src="js/algorithms.js?v=2026-10-13f"></script>
-  <script src="js/print.js?v=2026-10-13f"></script>
-  <script src="js/app.js?v=2026-10-13f"></script>
-  <script src="js/intro.js?v=2026-10-13f"></script>
+  <script src="js/state.js?v=2026-10-14a"></script>
+  <script src="js/algorithms.js?v=2026-10-14a"></script>
+  <script src="js/print.js?v=2026-10-14a"></script>
+  <script src="js/app.js?v=2026-10-14a"></script>
+  <script src="js/intro.js?v=2026-10-14a"></script>
   <script data-goatcounter="https://aktivitetsdag.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
