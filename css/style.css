@@ -238,8 +238,28 @@ table.grid tr.break td { background: var(--break); text-align: center; font-weig
 table.grid tr.break td input { text-align: center; font-weight: 600; background: transparent; }
 td.conflict select, select.conflict { background: var(--conflict); }
 /* Flex ligger på en indre div: en td med display:flex faller ut av tabellen i Safari */
-.assign-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
-.assign-wrap select { flex: 1 1 180px; }
+/* Ansvarlige ligger i et rutenett med like brede kolonner, så feltene står rett under hverandre fra rad til rad */
+.assign-wrap { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
+
+/* Oppgaver: faste kolonnebredder og en tynn strek mellom oppgavene */
+#task-table { table-layout: fixed; }
+#task-table th:nth-child(1) { width: 21%; }
+#task-table th:nth-child(2) { width: 136px; }
+#task-table th:nth-child(3) { width: 68px; }
+#task-table th:nth-child(5) { width: 40px; }
+#task-table td { padding: 7px 4px; vertical-align: top; }
+#task-table tbody tr + tr td { border-top: 1px solid var(--line); }
+#task-table td:last-child { text-align: center; }
+#task-table .icon { margin-top: 6px; }
+#task-table input.timefield, #task-table input.tiny { width: 100%; max-width: none; }
+/* Egen pil i nedtrekkslistene, så de får samme høyde som tekstfeltene (Safari overser ellers padding) */
+#task-table select {
+  -webkit-appearance: none; appearance: none;
+  font-size: .92rem; padding-right: 26px; text-overflow: ellipsis;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%;
+  background-size: 5px 5px; background-repeat: no-repeat;
+}
 .match-sub { font-size: .75rem; color: var(--muted); margin-top: 2px; }
 #ref-schedule select + select { margin-top: 2px; }
 
@@ -427,19 +447,22 @@ label.inline input { width: 90px; margin: 0; }
   #schedule-table td[colspan]:not(.muted) { grid-column: 1 / -1; }
   #schedule-table td.muted { grid-column: 1 / -1; }
 
-  /* Oppgave: navn, antall og ✕ øverst, tidspunkt og ansvarlige under */
+  /* Oppgave: navn og ✕ øverst, tidspunkt og antall ved siden av hverandre, ansvarlige under */
+  #task-table { table-layout: auto; }
   #task-table thead { display: none; }
   #task-table tbody { display: block; }
-  #task-table tr { display: grid; grid-template-columns: 1fr 70px 44px; gap: 6px 8px; align-items: end; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  #task-table tr { display: grid; grid-template-columns: 1fr 76px 44px; gap: 8px; align-items: end; padding: 12px 0; }
+  #task-table tbody tr + tr { border-top: 1px solid var(--line); }
+  #task-table tbody tr + tr td { border-top: 0; }
   #task-table td { display: block; padding: 0; min-width: 0; }
-  #task-table td:nth-child(1) { grid-area: 1 / 1; }
-  #task-table td:nth-child(2) { grid-area: 2 / 1 / 3 / -1; }
-  #task-table td:nth-child(3) { grid-area: 1 / 2; }
+  #task-table td:nth-child(1) { grid-area: 1 / 1 / 2 / 3; }
+  #task-table td:nth-child(2) { grid-area: 2 / 1; }
+  #task-table td:nth-child(3) { grid-area: 2 / 2 / 3 / 4; }
   #task-table td:nth-child(4) { grid-area: 3 / 1 / 4 / -1; }
   #task-table td:nth-child(5) { grid-area: 1 / 3; align-self: center; }
   #task-table td[colspan] { grid-column: 1 / -1; }
-  #task-table input.timefield, #task-table input.tiny { width: 100%; max-width: none; }
-  #task-table .icon { min-width: 40px; min-height: 40px; }
+  #task-table .assign-wrap { grid-template-columns: 1fr; }
+  #task-table .icon { min-width: 40px; min-height: 40px; margin-top: 0; }
 }
 
 /* Velkomstanimasjon med baller (js/intro.js) */
