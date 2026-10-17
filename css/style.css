@@ -142,6 +142,20 @@ main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 48px; }
   box-shadow: var(--shadow);
 }
 
+/* Banestørrelser i barneishockey */
+.rink-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px; margin: 14px 0 10px; }
+.rink-fig { margin: 0; }
+.rink { width: 100%; height: auto; display: block; }
+.rink .ice { fill: var(--field); }
+.rink .area { fill: var(--clay); opacity: .55; }
+.rink .divider { fill: none; stroke: var(--card); stroke-width: 2.5; stroke-dasharray: 6 4; }
+.rink .mid { stroke: var(--danger); stroke-width: 1.5; opacity: .35; }
+.rink .board { fill: none; stroke: var(--accent); stroke-width: 3; }
+.rink .area-no { font-size: 16px; font-weight: 700; fill: var(--text); opacity: .7; text-anchor: middle; dominant-baseline: central; }
+.rink-fig figcaption { display: grid; gap: 2px; margin-top: 8px; }
+.rink-class { font-size: 1.05rem; }
+.rink-fig small { color: var(--muted); }
+#rinks[hidden] { display: none; }
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .cols > .card { margin-bottom: 0; }
 .cols + .card { margin-top: 16px; }

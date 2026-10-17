@@ -299,6 +299,8 @@
   function renderSport() {
     const found = Store.SPORTS.find(([name]) => name === S.event.sport);
     $('#sport-icon').textContent = found ? found[1] : '';
+    // Banestørrelsene gjelder ishockey, så de skjules når en annen idrett er valgt.
+    $('#rinks').hidden = !!S.event.sport && S.event.sport !== 'Ishockey';
   }
 
   function renderBinds() {
