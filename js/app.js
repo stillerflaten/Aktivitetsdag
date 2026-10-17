@@ -577,7 +577,7 @@
         sels.push(`<select data-path="tasks.${i}.assigned.${j}"${out ? ' class="conflict"' : ''}>${options(opts, id, '–')}</select>`);
       }
       return `<tr>
-        <td><input data-path="tasks.${i}.name" value="${esc(t.name)}" aria-label="Oppgave"></td>
+        <td data-label="Oppgave"><input data-path="tasks.${i}.name" value="${esc(t.name)}" aria-label="Oppgave"></td>
         <td data-label="Tidspunkt"><input data-path="tasks.${i}.time" value="${esc(t.time)}" placeholder="Valgfritt" class="timefield" aria-label="Tidspunkt"></td>
         <td data-label="Antall"><input type="number" min="0" max="20" data-type="number" aria-label="Antall" data-path="tasks.${i}.needed" value="${t.needed}" class="tiny"></td>
         <td class="assign" data-label="Ansvarlige"><div class="assign-wrap">${sels.join('')}</div></td>
