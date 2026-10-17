@@ -58,7 +58,8 @@
     const banes = sch.banes;
     const teamMap = App.teamMap();
     const classes = [...new Set(Object.values(teamMap).map((t) => t.klasse).filter(Boolean))];
-    let html = `<table class="p-table"><thead><tr><th rowspan="2">Tidspunkt</th>`;
+    // Faste kolonnebredder (p-grid): ellers kan Safari legge tabellen bredere enn siden, og siste bane blir kuttet i PDF-en.
+    let html = `<table class="p-table p-grid"><thead><tr><th rowspan="2" class="p-col-time">Tidspunkt</th>`;
     html += banes.map((b) => `<th colspan="2">${esc(b.name)}${b.klasse ? ' – ' + esc(b.klasse) : ''}</th>`).join('');
     html += `</tr><tr>${banes.map(() => '<th>Lag</th><th>Lag</th>').join('')}</tr></thead><tbody>`;
     for (const slot of sch.slots) {
@@ -109,7 +110,7 @@
     const banes = sch.banes;
     const names = Object.fromEntries(S.refs.people.map((p) => [p.id, p.name]));
     const teamMap = App.teamMap();
-    let html = `<table class="p-table"><thead><tr><th>Tidspunkt</th>${banes.map((b) => `<th>${esc(b.name)}</th>`).join('')}</tr></thead><tbody>`;
+    let html = `<table class="p-table p-grid"><thead><tr><th class="p-col-time">Tidspunkt</th>${banes.map((b) => `<th>${esc(b.name)}</th>`).join('')}</tr></thead><tbody>`;
     for (const slot of sch.slots) {
       const time = `${esc(slot.from)}${slot.to ? '-' + esc(slot.to) : ''}`;
       if (slot.type === 'break') {
@@ -205,7 +206,10 @@
   async function download(sections) {
     await loadLib();
     const fmt = { unit: 'mm', format: 'a4', orientation: 'landscape' };
-    const opt = { margin: [14, 10, 14, 10], jsPDF: fmt, html2canvas: { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 } };
+    // pagebreak: bare «legacy» (som vi ikke bruker). Ellers setter html2pdf inn tomrom foran tabeller som ikke skal deles,
+    // men vi deler sidene selv nedenfor.
+    const opt = { margin: [14, 10, 14, 10], jsPDF: fmt, pagebreak: { mode: ['legacy'] },
+      html2canvas: { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 } };
     const canvases = [];
     // html2canvas (særlig i Safari) tegner feil utsnitt hvis siden er rullet ned. Rull til toppen mens vi tegner.
     const sx = window.scrollX, sy = window.scrollY;
