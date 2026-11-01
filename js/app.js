@@ -163,6 +163,9 @@
       const t = byId[S.teams.assignment[p.id]];
       if (t) t.players.push(p);
     }
+    // Keeperne står øverst på laget (ellers samme rekkefølge som før), både på skjermen og i PDF-en.
+    const keepers = S.teams.keepers || {};
+    teams.forEach((t) => t.players.sort((a, b) => (keepers[b.id] ? 1 : 0) - (keepers[a.id] ? 1 : 0)));
     return teams;
   }
 
