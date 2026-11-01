@@ -547,3 +547,81 @@ label.inline input { width: 90px; margin: 0; }
   .p-page { break-after: page; page-break-after: always; }
   .p-page:last-child { break-after: auto; page-break-after: auto; }
 }
+
+/* ===== Fargeleken: hver fane har sin egen farge, hentet fra lagfargene =====
+   Toppmenyen beholder skiferfargen fra logoen. Fanefargene styrer --accent på hver side,
+   så knapper, overskrifter, kortkanter og merker får sidens farge. Påvirker ikke PDF/utskrift. */
+:root {
+  --bg: #F7F4EE;
+  --c-dag: #D0704C;      /* oransje */
+  --c-lag: #3F7FA6;      /* blå */
+  --c-kamp: #4F9A61;     /* grønn */
+  --c-oppg: #C99A2E;     /* gul */
+  --c-dom: #8A62A3;      /* lilla */
+  --c-reg: #2F978E;      /* turkis */
+}
+.page { --accent-text: #fff; }
+#page-dag      { --accent: var(--c-dag);  --accent-soft: #F8E3D9; --highlight: #B4532F; }
+#page-lag      { --accent: var(--c-lag);  --accent-soft: #DFEBF3; --highlight: #2F6A8F; }
+#page-kamp     { --accent: var(--c-kamp); --accent-soft: #E0F0E3; --highlight: #3B7D4C; }
+#page-oppgaver { --accent: var(--c-oppg); --accent-soft: #F7EDD3; --highlight: #8F6A12; }
+#page-dommer   { --accent: var(--c-dom);  --accent-soft: #EEE4F3; --highlight: #71498B; }
+#page-regler   { --accent: var(--c-reg);  --accent-soft: #DDF1EE; --highlight: #227A72; }
+
+/* Mørk modus: lysere utgaver av fanefargene (samme verdier i begge blokkene) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #162028; }
+  :root:not([data-theme="light"]) .page { --accent-text: #162028; }
+  :root:not([data-theme="light"]) #page-dag      { --accent: #F0956F; --accent-soft: #3C2A24; --highlight: #F0956F; }
+  :root:not([data-theme="light"]) #page-lag      { --accent: #7DB6DA; --accent-soft: #1F3444; --highlight: #7DB6DA; }
+  :root:not([data-theme="light"]) #page-kamp     { --accent: #85C795; --accent-soft: #1F3828; --highlight: #85C795; }
+  :root:not([data-theme="light"]) #page-oppgaver { --accent: #E8C05E; --accent-soft: #3A3220; --highlight: #E8C05E; }
+  :root:not([data-theme="light"]) #page-dommer   { --accent: #BD97D6; --accent-soft: #33283E; --highlight: #BD97D6; }
+  :root:not([data-theme="light"]) #page-regler   { --accent: #6FCFC5; --accent-soft: #1E3836; --highlight: #6FCFC5; }
+}
+:root[data-theme="dark"] { --bg: #162028; }
+:root[data-theme="dark"] .page { --accent-text: #162028; }
+:root[data-theme="dark"] #page-dag      { --accent: #F0956F; --accent-soft: #3C2A24; --highlight: #F0956F; }
+:root[data-theme="dark"] #page-lag      { --accent: #7DB6DA; --accent-soft: #1F3444; --highlight: #7DB6DA; }
+:root[data-theme="dark"] #page-kamp     { --accent: #85C795; --accent-soft: #1F3828; --highlight: #85C795; }
+:root[data-theme="dark"] #page-oppgaver { --accent: #E8C05E; --accent-soft: #3A3220; --highlight: #E8C05E; }
+:root[data-theme="dark"] #page-dommer   { --accent: #BD97D6; --accent-soft: #33283E; --highlight: #BD97D6; }
+:root[data-theme="dark"] #page-regler   { --accent: #6FCFC5; --accent-soft: #1E3836; --highlight: #6FCFC5; }
+
+/* Regnbuestripe under toppmenyen, og fanens egen farge under valgt fane */
+.topbar {
+  box-shadow: none;
+  border-bottom: 5px solid;
+  border-image: linear-gradient(90deg, var(--c-dag) 0 16.66%, var(--c-lag) 16.66% 33.33%, var(--c-kamp) 33.33% 50%,
+    var(--c-oppg) 50% 66.66%, var(--c-dom) 66.66% 83.33%, var(--c-reg) 83.33%) 1;
+}
+.tab.active::after { height: 4px; }
+.tab[data-tab="dag"].active::after      { background: var(--c-dag); }
+.tab[data-tab="lag"].active::after      { background: var(--c-lag); }
+.tab[data-tab="kamp"].active::after     { background: var(--c-kamp); }
+.tab[data-tab="oppgaver"].active::after { background: var(--c-oppg); }
+.tab[data-tab="dommer"].active::after   { background: var(--c-dom); }
+.tab[data-tab="regler"].active::after   { background: var(--c-reg); }
+
+/* Forsiden: skifer med varme flekker av gult og oransje */
+.hero {
+  background:
+    radial-gradient(circle at 88% 20%, rgba(221, 176, 74, .35), transparent 40%),
+    radial-gradient(circle at 70% 110%, rgba(208, 112, 76, .45), transparent 45%),
+    linear-gradient(135deg, #2F4858, #33617A);
+}
+
+/* Kortene får en farget kant i sidens farge, og sidetittelen samme farge */
+.page .card { border-left: 5px solid var(--accent); }
+.page-head h1 { color: var(--accent); }
+table.grid th { background: var(--accent-soft); }
+.page .btn.primary { box-shadow: 0 2px 0 rgba(0, 0, 0, .12); }
+
+/* Barnerettighetene får hver sin farge */
+.right-no { color: #fff; }
+.right:nth-child(6n+1) .right-no { background: var(--c-dag); }
+.right:nth-child(6n+2) .right-no { background: var(--c-lag); }
+.right:nth-child(6n+3) .right-no { background: var(--c-kamp); }
+.right:nth-child(6n+4) .right-no { background: var(--c-oppg); }
+.right:nth-child(6n+5) .right-no { background: var(--c-dom); }
+.right:nth-child(6n)   .right-no { background: var(--c-reg); }
