@@ -367,13 +367,24 @@
     const opts = teams.map((t) => ({ id: t.id, label: multi ? `${t.name} ${t.klasse}` : t.name }));
     const assigned = new Set(teams.flatMap((t) => t.players.map((p) => p.id)));
     const unassigned = presentPlayers().filter((p) => !assigned.has(p.id));
+    const keepers = S.teams.keepers || {};
+    // Hansken merker keeper. Den vises bare for spillere som er på et lag.
+    const keeperBtn = (p) => {
+      const on = !!keepers[p.id];
+      return `<button type="button" class="keeper-btn${on ? ' on' : ''}" data-action="toggle-keeper" data-i="${S.players.indexOf(p)}"
+        aria-pressed="${on}" title="${on ? 'Keeper. Trykk for å fjerne' : 'Merk som keeper'}" aria-label="Keeper: ${esc(p.name)}">🧤</button>`;
+    };
+    const keeperLine = (t) => {
+      const names = t.players.filter((p) => keepers[p.id]).map((p) => esc(p.name));
+      return names.length ? `<span class="team-keeper">${t.coaches ? ' · ' : ''}Keeper: ${names.join(', ')}</span>` : '';
+    };
     const playerRow = (p, teamId) => `
-      <li><span>${esc(p.name)}</span>
+      <li><span class="pl-name">${esc(p.name)}${teamId ? keeperBtn(p) : ''}</span>
         <select data-path="teams.assignment.${p.id}" aria-label="Flytt ${esc(p.name)}">${options(opts, teamId, '– uten lag –')}</select></li>`;
     let html = teams.map((t) => `
       <div class="team-card">
         <div class="team-head" style="background:${esc(t.color)};color:${Print.textOn(t.color)}">${esc(t.name)}${multi ? ' ' + esc(t.klasse) : ''} <small>(${t.players.length})</small></div>
-        <div class="team-coach">${esc(t.coaches)}</div>
+        <div class="team-coach">${esc(t.coaches)}${keeperLine(t)}</div>
         <ul>${t.players.map((p) => playerRow(p, t.id)).join('')}</ul>
       </div>`).join('');
     if (unassigned.length) {
@@ -717,6 +728,7 @@
       ? plan.flatMap((c) => Algo.makeTeams(c.ids, c.k, S.teams.method, S.history))
       : Algo.makeTeams(players.map((p) => p.id), k, S.teams.method, S.history);
     S.teams.assignment = {};
+    S.teams.keepers = {}; // nye lag, så keeperne må velges på nytt
     groups.forEach((g, i) => g.forEach((id) => { S.teams.assignment[id] = S.teams.names[i].id; }));
     const repeats = S.history.length ? Algo.countRepeats(groups, S.history) : 0;
     $('#team-repeat-info').textContent = S.history.length
@@ -985,6 +997,14 @@
       const p = S.players[i];
       S.players.splice(i, 1);
       delete S.teams.assignment[p.id];
+      if (S.teams.keepers) delete S.teams.keepers[p.id];
+    },
+    'toggle-keeper': (i) => {
+      const p = S.players[i];
+      if (!p) return;
+      S.teams.keepers = S.teams.keepers || {};
+      if (S.teams.keepers[p.id]) delete S.teams.keepers[p.id];
+      else S.teams.keepers[p.id] = true;
     },
     'del-guest': (i) => { S.schedule.guests.splice(i, 1); },
     'del-bane': (i) => { S.schedule.banes.splice(i, 1); },
@@ -1151,6 +1171,8 @@
       const path = el.dataset.bind || el.dataset.path;
       if (!path) return;
       setPath(S, path, readValue(el));
+      // En spiller som flyttes til et annet lag, er ikke lenger keeper der hen kom fra.
+      if (path.startsWith('teams.assignment.') && S.teams.keepers) delete S.teams.keepers[path.slice(17)];
       Store.save();
       const full = el.type === 'checkbox' || el.type === 'color' || el.tagName === 'SELECT' || el.dataset.type === 'number';
       renderAll(full ? null : el.closest('table') || el);
