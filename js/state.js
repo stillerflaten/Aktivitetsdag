@@ -57,7 +57,8 @@
         count: 3,
         method: 'mix',
         names: TEAM_NAMES.slice(0, 3).map((n, i) => ({ id: uid('lag'), name: n, color: COLORS[i], coaches: '' })),
-        assignment: {} // spillerId -> lagId
+        assignment: {}, // spillerId -> lagId
+        keepers: {} // spillerId -> true for dem som er keeper på laget sitt
       },
       schedule: {
         includeOwn: true,
