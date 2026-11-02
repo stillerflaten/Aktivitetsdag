@@ -144,7 +144,7 @@
 
   // Bunnteksten reklamerer for siden, så de som får arket vet hvor de finner den.
   const SITE = 'www.aktivitetsdag.org';
-  const SITE_TEXT = 'Lag din egen aktivitetsdag på ';
+  const SITE_TEXT = 'Planlegg din egen aktivitetsdag på ';
 
   function print(sections) {
     const area = document.getElementById('print-area');
